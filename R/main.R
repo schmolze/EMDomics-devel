@@ -294,51 +294,27 @@ EMDomics <- function(data, samplesA, samplesB, emd, emd.perm) {
 
 # computes multi-class EMD score for a single gene
 .emd_gene_multi <- function(geneData, idxA, idxB, binSize) {
-
+  
 }
 
-# computes EMD score for a single gene
+# computes all pairwise EMD scores for a single gene
 .emd_gene <- function(geneData, outcomes, binSize) {
   
-  # number of classes
-  classes <- unique(outcomes)
-  n.classes <- length(classes)
+  pairs <- combn(outcomes,2)
   
-  # matrix to keep track of which comparisons have already finished
-  mat <- matrix(0, nrow=n.classes, ncol=n.classes)
-  
-  for (src in 1:n.classes) # cycles over which pile should be the source
+  EMDtot <- 0 # holds the sum of all the EMD scores
+  for (p in pairs)
   {
-    for (sink in 1:n.classes)
-    {
-      if (src != sink) # avoid comparing a pile to itself
-      {
-        if (mat[src][sink] == 0 && mat[sink][src] == 0) # avoid redoing a comparison
-        {
-          src.lab <- classes[src]
-          sink.lab <- classes[sink]
-         
-          src.data <- geneData[src.lab]
-          sink.data <- geneData[sink.lab]
-         
-          bins <- seq(floor(min(c(src.data,sink.data))),
-                     ceiling(max(c(src.data,sink.data))),
-                     by=binSize )
-         
-          src.hist <- hist(src.data, breaks=bins, plot=FALSE)
-          sink.hist <- hist(sink.data, breaks=bins, plot=FALSE)
-          src.dens <- as.matrix(src.hist$density)
-          sink.dens <- as.matrix(sink.hist$density)
-          
-          emdist::emd2d(densA, densB)
-          
-          mat[src][sink] <- 1
-          mat[sink][src] <- 1
-        }
-      }
-    }
+    inds <- pairs[p]
+    src <- ind[1]
+    sink <- ind[2]
+    
+    src.lab <- names(outcomes[outcomes==src])
+    sink.lab <- names(outcomes[outcomes==sink])
+    
+    EMD <- calculate_emd_gene(geneData,src.lab,sink.lab,binSize)
+    EMDtot <- EMDtot + EMD
   }
-
 }
 
 # computes log2 fold change
