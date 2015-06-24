@@ -80,7 +80,7 @@ NULL
 #' results <- calculate_emd(dat, groupA, groupB, nperm=10, parallel=FALSE)
 #' head(results$emd)
 #' @seealso \code{\link{EMDomics}} \code{\link[emdist]{emd2d}}
-calculate_emd <- function(data, samplesA, samplesB, binSize=0.2,
+calculate_emd <- function(data, outcomes, binSize=0.2,
                             nperm=100, verbose=TRUE, parallel=TRUE) {
 
   bpparam <- BiocParallel::bpparam()
@@ -91,17 +91,14 @@ calculate_emd <- function(data, samplesA, samplesB, binSize=0.2,
   # transpose and coerce to df (for bplapply)
   data.df <- as.data.frame(t(data))
   sample_names <- rownames(data.df)
-
-  idxA <- match(samplesA, sample_names)
-  idxB <- match(samplesB, sample_names)
-
+  
   # ---------- emd ------------
 
   # calculate emd for each gene
   if (verbose)
     message("Calculating emd...", appendLF=FALSE)
 
-  emd <- unlist(BiocParallel::bplapply(data.df, .emd_gene, idxA, idxB,
+  emd <- unlist(BiocParallel::bplapply(data.df, .emd_gene, outcomes,
                                        binSize,
                                        BPPARAM = bpparam))
 
@@ -295,24 +292,52 @@ EMDomics <- function(data, samplesA, samplesB, emd, emd.perm) {
 
 }
 
+# computes multi-class EMD score for a single gene
+.emd_gene_multi <- function(geneData, idxA, idxB, binSize) {
+
+}
 
 # computes EMD score for a single gene
-.emd_gene <- function(geneData, idxA, idxB, binSize) {
-
-  dataA <- geneData[idxA]
-  dataB <- geneData[idxB]
-
-  bins <- seq(floor(min(c(dataA, dataB))),
-              ceiling(max(c(dataA, dataB))),
-              by=binSize )
-
-  histA <- hist(dataA, breaks=bins, plot=FALSE)
-  histB <- hist(dataB, breaks=bins, plot=FALSE)
-
-  densA <- as.matrix(histA$density)
-  densB <- as.matrix(histB$density)
-
-  emdist::emd2d(densA, densB)
+.emd_gene <- function(geneData, outcomes, binSize) {
+  
+  # number of classes
+  classes <- unique(outcomes)
+  n.classes <- length(classes)
+  
+  # matrix to keep track of which comparisons have already finished
+  mat <- matrix(0, nrow=n.classes, ncol=n.classes)
+  
+  for (src in 1:n.classes) # cycles over which pile should be the source
+  {
+    for (sink in 1:n.classes)
+    {
+      if (src != sink) # avoid comparing a pile to itself
+      {
+        if (mat[src][sink] == 0 && mat[sink][src] == 0) # avoid redoing a comparison
+        {
+          src.lab <- classes[src]
+          sink.lab <- classes[sink]
+         
+          src.data <- geneData[src.lab]
+          sink.data <- geneData[sink.lab]
+         
+          bins <- seq(floor(min(c(src.data,sink.data))),
+                     ceiling(max(c(src.data,sink.data))),
+                     by=binSize )
+         
+          src.hist <- hist(src.data, breaks=bins, plot=FALSE)
+          sink.hist <- hist(sink.data, breaks=bins, plot=FALSE)
+          src.dens <- as.matrix(src.hist$density)
+          sink.dens <- as.matrix(sink.hist$density)
+          
+          emdist::emd2d(densA, densB)
+          
+          mat[src][sink] <- 1
+          mat[sink][src] <- 1
+        }
+      }
+    }
+  }
 
 }
 
