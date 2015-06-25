@@ -292,11 +292,6 @@ EMDomics <- function(data, samplesA, samplesB, emd, emd.perm) {
 
 }
 
-# computes multi-class EMD score for a single gene
-.emd_gene_multi <- function(geneData, idxA, idxB, binSize) {
-  
-}
-
 # computes all pairwise EMD scores for a single gene
 .emd_gene <- function(geneData, outcomes, binSize) {
   
