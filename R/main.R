@@ -236,23 +236,23 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
 #'
 #' calculate_emd_gene(vec, groupA, groupB)
 #' @seealso \code{\link[emdist]{emd2d}}
-calculate_emd_gene <- function(vec, samplesA, samplesB, binSize=0.2) {
+calculate_emd_gene <- function(vec, outcomes, binSize=0.2) {
 
-  dataA <- vec[samplesA]
-  dataB <- vec[samplesB]
-
-  bins <- seq(floor(min(c(dataA, dataB))),
-              ceiling(max(c(dataA, dataB))),
-              by=binSize )
-
-  histA <- hist(dataA, breaks=bins, plot=FALSE)
-  histB <- hist(dataB, breaks=bins, plot=FALSE)
-
-  densA <- as.matrix(histA$density)
-  densB <- as.matrix(histB$density)
-
-  emdist::emd2d(densA, densB)
-
+  pairs <- combn(outcomes,2)
+  
+  EMDtot <- 0 # holds the sum of all the EMD scores
+  for (p in pairs)
+  {
+    inds <- pairs[p]
+    src <- ind[1]
+    sink <- ind[2]
+    
+    src.lab <- names(outcomes[outcomes==src])
+    sink.lab <- names(outcomes[outcomes==sink])
+    
+    EMD <- .emd_gene_pairwise(vec,src.lab,sink.lab,binSize)
+    EMDtot <- EMDtot + EMD
+  }
 }
 
 
@@ -307,9 +307,27 @@ EMDomics <- function(data, samplesA, samplesB, emd, emd.perm) {
     src.lab <- names(outcomes[outcomes==src])
     sink.lab <- names(outcomes[outcomes==sink])
     
-    EMD <- calculate_emd_gene(geneData,src.lab,sink.lab,binSize)
+    EMD <- .emd_gene_pairwise(geneData,src.lab,sink.lab,binSize)
     EMDtot <- EMDtot + EMD
   }
+}
+
+# computes pairwise EMD
+.emd_gene_pairwise <- function(vec, idxA, idxB, binSize=0.2) {
+  dataA <- vec[samplesA]
+  dataB <- vec[samplesB]
+  
+  bins <- seq(floor(min(c(dataA, dataB))),
+              ceiling(max(c(dataA, dataB))),
+              by=binSize )
+  
+  histA <- hist(dataA, breaks=bins, plot=FALSE)
+  histB <- hist(dataB, breaks=bins, plot=FALSE)
+  
+  densA <- as.matrix(histA$density)
+  densB <- as.matrix(histB$density)
+  
+  emdist::emd2d(densA, densB)
 }
 
 # computes log2 fold change
