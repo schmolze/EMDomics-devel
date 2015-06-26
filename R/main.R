@@ -330,7 +330,7 @@ EMDomics <- function(data, samplesA, samplesB, emd, emd.perm) {
   emdist::emd2d(densA, densB)
 }
 
-# computes log2 fold change
+# computes log2 fold change -- replace with pairwise EMD
 .fc <- function(geneData, idxA, idxB) {
 
   dataA <- geneData[idxA]
