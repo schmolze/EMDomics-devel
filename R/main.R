@@ -17,10 +17,10 @@ NULL
 #' @description This is the main user interface to the \pkg{EMDomics} package, and
 #' will usually the only function needed.
 #'
-#' The algorithm is used to compare genomics data between two groups, refered to
-#' herein as "group A" and "group B". Usually the data will be gene expression
+#' The algorithm is used to compare genomics data between any number of groups. 
+#' Usually the data will be gene expression
 #' values from array-based or sequence-based experiments, but data from other
-#' types of experiments can also be analyzed (i.e. copy number variation).
+#' types of experiments can also be analyzed (e.g. copy number variation).
 #'
 #' Traditional methods like Significance Analysis of Microarrays (SAM) and Linear
 #' Models for Microarray Data (LIMMA) use significance tests based on summary
@@ -35,9 +35,11 @@ NULL
 #' two heterogeneous distributions.
 #'
 #' The EMD-based algorithm implemented in \pkg{EMDomics} has two main steps.
-#' First, a matrix (e.g. of expression data) is divided into data for "group A"
-#' and "group B", and the EMD score is calculated using the two groups for each
-#' gene in the data set. Next, the labels for group A and group B are randomly
+#' First, a matrix (e.g. of expression data) is divided into data for each group, and
+#' the EMD score for each pairwise comparison is computed. The final EMD score for a gene
+#' is the sum of all of the EMD scores from each of the pairwise comparisons. Note that in
+#' a basic two-class comparison, the EMD score is calculated from a comparison of the two
+#' classes. Next, the labels for the groups are randomly
 #' permuted a specified number of times, and an EMD score for each permutation is
 #' calculated. The median of the permuted scores for each gene is used as
 #' the null distribution, and the False Discovery Rate (FDR) is computed for
@@ -46,21 +48,15 @@ NULL
 #' the significance of the EMD score analogously to a p-value (e.g. q-value
 #' < 0.05 = significant.)
 #'
-#' Note that q-values of 0 are adjusted to 1/(nperm+1). For this reason, the
-#' \code{nperm} parameter should not be too low (the default of 100 is
-#' reasonable).
-#'
 #' @param data A matrix containing genomics data (e.g. gene expression levels).
 #' The rownames should contain gene identifiers, while the column names should
 #' contain sample identifiers.
-#' @param samplesA A vector of sample names identifying samples in \code{data}
-#' that belong to "group A". The names must corresponding to column names
-#' in \code{data}.
-#' @param samplesB A vector of sample names identifying samples in \code{data}
-#' that belong to "group B". The names must corresponding to column names
-#' in \code{data}.
+#' @param outcomes A named vector with the outcomes for each of the samples. Outcomes
+#' can be denoted in numeric or character format. The name for each outcome is the
+#' sample identifier associated with that outcome. Note that the names of outcomes
+#' ought to correspond to the column names of \code{data}.
 #' @param binSize The bin size to be used when generating histograms of
-#' the data for "group A" and "group B". Defaults to 0.2.
+#' the data for each specified group. Defaults to 0.2.
 #' @param nperm An integer specifying the number of randomly permuted EMD
 #' scores to be computed. Defaults to 100.
 #' @param verbose Boolean specifying whether to display progress messages.
@@ -73,12 +69,13 @@ NULL
 #' rownames(dat) <- paste("gene", 1:100, sep="")
 #' colnames(dat) <- paste("sample", 1:100, sep="")
 #'
-#' # "group A" = first 50, "group B" = second 50
-#' groupA <- colnames(dat)[1:50]
-#' groupB <- colnames(dat)[51:100]
-
-#' results <- calculate_emd(dat, groupA, groupB, nperm=10, parallel=FALSE)
+#' # create outcomes vector
+#' # group 1: first 50 patients, group 2: second 30 patients, group 3: final 20 patients
+#' outcomes<-c(rep(1,50), rep(2,30), rep(3,20))
+#' 
+#' results <- calculate_emd(dat, outcomes, nperm=10, parallel=FALSE)
 #' head(results$emd)
+#' 
 #' @seealso \code{\link{EMDomics}} \code{\link[emdist]{emd2d}}
 calculate_emd <- function(data, outcomes, binSize=0.2,
                             nperm=100, verbose=TRUE, parallel=TRUE) {
@@ -123,7 +120,7 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
 
   # --------------- permuted emd scores ----------------
 
-  sample_count <- length(samplesA)+length(samplesB)
+  sample_count <- length(outcomes)
 
   # matrix to hold permuted emd values
   emd.perm <- matrix(nrow=ncol(data.df), ncol=nperm)
@@ -144,7 +141,7 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
 
     # calculate emd for permuted samples
     emd.perm[, i] <- unlist(BiocParallel::bplapply(data.perm, .emd_gene,
-                                                   idxA, idxB,
+                                                   outcomes,
                                                    binSize,
                                                    BPPARAM = bpparam))
 
@@ -284,9 +281,9 @@ calculate_emd_gene <- function(vec, outcomes, binSize=0.2) {
 #' @return The function combines it's arguments in a list, which is assigned class
 #' 'EMDomics'. The resulting object is returned.
 #' @seealso \code{\link{calculate_emd}}
-EMDomics <- function(data, samplesA, samplesB, emd, emd.perm) {
+EMDomics <- function(data, outcomes, emd, emd.perm) {
 
-  structure(list("data"=data, "samplesA"=samplesA, "samplesB"=samplesB,
+  structure(list("data"=data, "outcomes" = outcomes,
                  "emd"=emd, "emd.perm"=emd.perm),
             class = "EMDomics")
 
