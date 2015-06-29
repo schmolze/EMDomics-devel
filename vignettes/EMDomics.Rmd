@@ -1,6 +1,6 @@
 ---
 title: "EMDomics Vignette"
-author: "Daniel Schmolze"
+author: "Sadhika Malladi and Daniel Schmolze"
 date: "`r Sys.Date()`"
 output: 
   rmarkdown::html_vignette:
@@ -136,6 +136,7 @@ plot_emdnull(results)
 ```
 
 # Wrapping Up
+While the above demonstrations involve a two-class comparison, **EMDomics** supports multi-class comparison.
 
 This concludes the **EMDomics** vignette. For additional information, please consult the reference manual.
 
