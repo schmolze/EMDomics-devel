@@ -92,7 +92,7 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
     message("Calculating pairwise emd scores...", appendLF=FALSE)
   
   emd.tab <- unlist(BiocParallel::bplapply(data.df, .emd_pairwise_table, outcomes,
-                                           binSize,
+                                           binSize, verbose,
                                            BPPARAM = bpparam))
   emd.tab <- as.matrix(emd.tab)
   
@@ -286,7 +286,7 @@ EMDomics <- function(data, outcomes, emd, emd.perm, pairwise.emd) {
 }
 
 # Creates a table of all the pairwise EMD scores for one gene
-.emd_pairwise_table <- function(geneData, outcomes, binSize) {
+.emd_pairwise_table <- function(geneData, outcomes, binSize, verbose) {
   
   pairs <- combn(outcomes,2)
   
@@ -294,6 +294,9 @@ EMDomics <- function(data, outcomes, emd, emd.perm, pairwise.emd) {
   
   for (p in 1:length(pairs))
   {
+    if (verbose)
+      message(paste0('Computing pair ',p,' of ',length(pairs),'...'))
+    
     inds <- pairs[p]
     src <- ind[1]
     sink <- ind[2]
@@ -306,6 +309,8 @@ EMDomics <- function(data, outcomes, emd, emd.perm, pairwise.emd) {
     
     EMD <- .emd_gene_pairwise(geneData,src.lab,sink.lab,binSize)
     EMD.tab[1,p] <- EMD
+    if (verbose)
+      message('done\n')
   }
   
   EMD.tab
