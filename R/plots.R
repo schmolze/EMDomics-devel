@@ -15,10 +15,9 @@
 #' colnames(dat) <- paste("sample", 1:100, sep="")
 #'
 #' # "group A" = first 50, "group B" = second 50
-#' groupA <- colnames(dat)[1:50]
-#' groupB <- colnames(dat)[51:100]
+#' groups <- c(rep("A",50),rep("B",50))
 #'
-#' results <- calculate_emd(dat, groupA, groupB, nperm=10)
+#' results <- calculate_emd(dat, groups, nperm=10)
 #' plot_emdnull(results)
 #' @seealso \code{\link{calculate_emd}} \code{\link[ggplot2]{ggplot}}
 plot_emdnull <- function(emdobj) {
@@ -57,11 +56,10 @@ plot_emdnull <- function(emdobj) {
 #' rownames(dat) <- paste("gene", 1:100, sep="")
 #' colnames(dat) <- paste("sample", 1:100, sep="")
 #'
-#' # "group A" = first 50, "group B" = second 50
-#' groupA <- colnames(dat)[1:50]
-#' groupB <- colnames(dat)[51:100]
-#'
-#' results <- calculate_emd(dat, groupA, groupB, nperm=10)
+#' # "A": first 50 samples; "B": next 30 samples; "C": final 20 samples
+#' outcomes <- c(rep("A",50), rep("B",30), rep("C",20))
+#' 
+#' results <- calculate_emd(dat, outcomes, nperm=10, parallel=FALSE)
 #' plot_perms(results)
 #' @seealso \code{\link{calculate_emd}} \code{\link[ggplot2]{ggplot}}
 plot_perms <- function(emdobj) {
@@ -87,8 +85,8 @@ plot_perms <- function(emdobj) {
 #' @export
 #' @title Plot distributions and EMD score for a gene.
 #' @description The data for the specified gene is retrieved from
-#' \code{emdobj$emd}. \code{emdobj$samplesA} and \code{emdobj$samplesB} are used
-#' to divide the data into two distributions, which are then visualized as
+#' \code{emdobj$emd}. \code{outcomes} is used
+#' to divide the data into distributions for each group, which are then visualized as
 #' density distributions. The calculated EMD score for the specified gene is
 #' displayed in the plot title.
 #' @param emdobj An \code{\link{EMDomics}} object, typically returned via a call
@@ -103,12 +101,12 @@ plot_perms <- function(emdobj) {
 #' rownames(dat) <- paste("gene", 1:100, sep="")
 #' colnames(dat) <- paste("sample", 1:100, sep="")
 #'
-#' # "group A" = first 50, "group B" = second 50
-#' groupA <- colnames(dat)[1:50]
-#' groupB <- colnames(dat)[51:100]
-#'
-#' results <- calculate_emd(dat, groupA, groupB, nperm=10)
+#' # "A": first 50 samples; "B": next 30 samples; "C": final 20 samples
+#' outcomes <- c(rep("A",50), rep("B",30), rep("C",20))
+#' 
+#' results <- calculate_emd(dat, outcomes, nperm=10, parallel=FALSE)
 #' plot_density(results, "gene5")
+#' 
 #' @seealso \code{\link{calculate_emd}} \code{\link[ggplot2]{ggplot}}
 plot_density <- function(emdobj, gene_name) {
 
