@@ -85,8 +85,8 @@ plot_perms <- function(emdobj) {
 #' @export
 #' @title Plot distributions and EMD score for a gene.
 #' @description The data for the specified gene is retrieved from
-#' \code{emdobj$emd}. \code{outcomes} is used
-#' to divide the data into distributions for each group, which are then visualized as
+#' \code{emdobj$data}. \code{outcomes} is used to divide the data into 
+#' distributions for each group, which are then visualized as
 #' density distributions. The calculated EMD score for the specified gene is
 #' displayed in the plot title.
 #' @param emdobj An \code{\link{EMDomics}} object, typically returned via a call
