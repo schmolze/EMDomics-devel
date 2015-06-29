@@ -17,10 +17,10 @@ NULL
 #' @description This is the main user interface to the \pkg{EMDomics} package, and
 #' will usually the only function needed.
 #'
-#' The algorithm is used to compare genomics data between two groups, refered to
-#' herein as "group A" and "group B". Usually the data will be gene expression
+#' The algorithm is used to compare genomics data between any number of groups. 
+#' Usually the data will be gene expression
 #' values from array-based or sequence-based experiments, but data from other
-#' types of experiments can also be analyzed (i.e. copy number variation).
+#' types of experiments can also be analyzed (e.g. copy number variation).
 #'
 #' Traditional methods like Significance Analysis of Microarrays (SAM) and Linear
 #' Models for Microarray Data (LIMMA) use significance tests based on summary
@@ -30,14 +30,15 @@ NULL
 #' (e.g sensitive vs. resistant tumor samples).
 #'
 #' The Earth Mover's Distance algorithm instead computes the "work" needed
-#' to transform one distribution into the other, thus capturing possibly
+#' to transform one distribution into another, thus capturing possibly
 #' valuable information relating to the overall difference in shape between
 #' two heterogeneous distributions.
 #'
 #' The EMD-based algorithm implemented in \pkg{EMDomics} has two main steps.
-#' First, a matrix (e.g. of expression data) is divided into data for "group A"
-#' and "group B", and the EMD score is calculated using the two groups for each
-#' gene in the data set. Next, the labels for group A and group B are randomly
+#' First, a matrix (e.g. of expression data) is divided into data for each of the groups.
+#' Every possible pairwise EMD score is then computed and stored in a table. The EMD score
+#' for a single gene is calculated by summing all of the pairwise EMD scores.
+#' Next, the labels for each of the groups are randomly
 #' permuted a specified number of times, and an EMD score for each permutation is
 #' calculated. The median of the permuted scores for each gene is used as
 #' the null distribution, and the False Discovery Rate (FDR) is computed for
@@ -46,21 +47,13 @@ NULL
 #' the significance of the EMD score analogously to a p-value (e.g. q-value
 #' < 0.05 = significant.)
 #'
-#' Note that q-values of 0 are adjusted to 1/(nperm+1). For this reason, the
-#' \code{nperm} parameter should not be too low (the default of 100 is
-#' reasonable).
-#'
 #' @param data A matrix containing genomics data (e.g. gene expression levels).
 #' The rownames should contain gene identifiers, while the column names should
 #' contain sample identifiers.
-#' @param samplesA A vector of sample names identifying samples in \code{data}
-#' that belong to "group A". The names must corresponding to column names
-#' in \code{data}.
-#' @param samplesB A vector of sample names identifying samples in \code{data}
-#' that belong to "group B". The names must corresponding to column names
-#' in \code{data}.
+#' @param outcomes A vector containing group labels for each of the samples provided
+#' in the \code{data} matrix. The names should be the sample identifiers provided in \code{data}.
 #' @param binSize The bin size to be used when generating histograms of
-#' the data for "group A" and "group B". Defaults to 0.2.
+#' the data for each group. Defaults to 0.2.
 #' @param nperm An integer specifying the number of randomly permuted EMD
 #' scores to be computed. Defaults to 100.
 #' @param verbose Boolean specifying whether to display progress messages.
@@ -73,12 +66,12 @@ NULL
 #' rownames(dat) <- paste("gene", 1:100, sep="")
 #' colnames(dat) <- paste("sample", 1:100, sep="")
 #'
-#' # "group A" = first 50, "group B" = second 50
-#' groupA <- colnames(dat)[1:50]
-#' groupB <- colnames(dat)[51:100]
-
-#' results <- calculate_emd(dat, groupA, groupB, nperm=10, parallel=FALSE)
+#' # "A": first 50 samples; "B": next 30 samples; "C": final 20 samples
+#' outcomes <- c(rep("A",50), rep("B",30), rep("C",20))
+#' 
+#' results <- calculate_emd(dat, outcomes, nperm=10, parallel=FALSE)
 #' head(results$emd)
+#' 
 #' @seealso \code{\link{EMDomics}} \code{\link[emdist]{emd2d}}
 calculate_emd <- function(data, outcomes, binSize=0.2,
                             nperm=100, verbose=TRUE, parallel=TRUE) {
@@ -207,30 +200,31 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
 
 #' @export
 #' @title Calculate EMD score for a single gene
-#' @details The data in \code{vec} is divided into "group A" and "group B" by the
-#' identifiers given in \code{samplesA} and \code{samplesB}. The \code{\link{hist}}
-#' function is used to generate histograms for the two resulting groups, and the
-#' densities are retrieved and passed to \code{\link[emdist]{emd2d}} to compute the
-#' EMD score.
+#' @details All possible combinations of the classes are used as pairwise comparisons.
+#' The data in \code{vec} is divided based on class labels based on the \code{outcomes}
+#' identifiers given. For each pairwise computation, the \code{\link{hist}} function is
+#' used to generate histograms for the two groups. The densities are then retrieved
+#' and passed to  \code{\link[emdist]{emd2d}} to compute the pairwise EMD score. The 
+#' total EMD score for the given data is the sum of the pairwise EMD scores.
+#' 
 #' @param vec A named vector containing data (e.g. expression data) for a single
 #' gene.
-#' @param samplesA A vector of sample names identifying samples in \code{vec}
-#' that belong to "group A".
-#' @param samplesB A vector of sample names identifying samples in \code{vec}
-#' that belong to "group B".
-#' @param binSize The bin size to be used when generating histograms for
-#' "group A" and "group B".
+#' @param outcomes A vector of group labels for the samples. The names must correspond
+#' to the names of \code{vec}.
+#' @param binSize The bin size to be used when generating histograms for each of the groups.
 #' @return The emd score is returned.
+#' 
 #' @examples
-#' # 100 samples
-#' vec <- rnorm(100)
-#' names(vec) <- paste("sample", 1:100, sep="")
+#' # 100 genes, 100 samples
+#' dat <- matrix(rnorm(10000), nrow=100, ncol=100)
+#' rownames(dat) <- paste("gene", 1:100, sep="")
+#' colnames(dat) <- paste("sample", 1:100, sep="")
 #'
-#' # "group A" = first 50, "group B" = second 50
-#' groupA <- names(vec)[1:50]
-#' groupB <- names(vec)[51:100]
+#' # "A": first 50 samples; "B": next 30 samples; "C": final 20 samples
+#' outcomes <- c(rep("A",50), rep("B",30), rep("C",20))
 #'
-#' calculate_emd_gene(vec, groupA, groupB)
+#' calculate_emd_gene(vec, outcomes)
+#' 
 #' @seealso \code{\link[emdist]{emd2d}}
 calculate_emd_gene <- function(vec, outcomes, binSize=0.2) {
 
@@ -258,29 +252,30 @@ calculate_emd_gene <- function(vec, outcomes, binSize=0.2) {
 #' @title Create an EMDomics object
 #' @description This is the constructor for objects of class 'EMDomics'. It
 #' is used in \code{\link{calculate_emd}} to construct the return value.
+#' 
 #' @param data A matrix containing genomics data (e.g. gene expression levels).
 #' The rownames should contain gene identifiers, while the column names should
 #' contain sample identifiers.
-#' @param samplesA A vector of sample names identifying samples in \code{data}
-#' that belong to "group A". The names must corresponding to column names
-#' in \code{data}.
-#' @param samplesB A vector of sample names identifying samples in \code{data}
-#' that belong to "group B". The names must corresponding to column names
-#' in \code{data}.
+#' @param outcomes A vector of group labels for each of the sample identifiers. The
+#' names of this vector must correspond to the column names of \code{data}.
 #' @param emd A matrix containing a row for each gene in \code{data}, and with
 #' the following columns:
 #' \itemize{
 #' \item \code{emd} The calculated emd score.
-#' \item \code{fc} The log2 fold change of "group A" samples relative to "group B"
-#' samples.
 #' \item \code{q-value} The calculated q-value.
 #' }
 #' The row names should specify the gene identifiers for each row.
 #' @param emd.perm A matrix containing a row for each gene in \code{data}, and
 #' with a column containing emd scores for each random permutation calculated
 #' via \code{\link{calculate_emd}}.
-#' @return The function combines it's arguments in a list, which is assigned class
+#' @param pairwise.emd.table A table containing the EMD scores for each pairwise
+#' comparison for each gene. For a two-class problem, there should be only one column
+#' comparing class 1 and class 2. The row names should be gene identifiers. The column
+#' names should be in the format "<class 1> vs <class 2>" (e.g. "1 vs 2" or "A vs B").
+#' 
+#' @return The function combines its arguments in a list, which is assigned class
 #' 'EMDomics'. The resulting object is returned.
+#' 
 #' @seealso \code{\link{calculate_emd}}
 EMDomics <- function(data, outcomes, emd, emd.perm, pairwise.emd) {
 
@@ -290,7 +285,7 @@ EMDomics <- function(data, outcomes, emd, emd.perm, pairwise.emd) {
 
 }
 
-# Creates a table of all the pairwise EMD scores
+# Creates a table of all the pairwise EMD scores for one gene
 .emd_pairwise_table <- function(geneData, outcomes, binSize) {
   
   pairs <- combn(outcomes,2)
