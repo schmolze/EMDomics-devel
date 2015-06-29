@@ -113,24 +113,13 @@ plot_perms <- function(emdobj) {
 plot_density <- function(emdobj, gene_name) {
 
   data <- emdobj$data
-  samplesA <- emdobj$samplesA
-  samplesB <- emdobj$samplesB
-
+  outcomes <- emdobj$outcomes
+  classes <- unique(outcomes)
+  
   emd_score <- emdobj$emd[gene_name, "emd"]
-
-  dfA <- as.data.frame(data[gene_name, samplesA])
-  dfB <- as.data.frame(data[gene_name, samplesB])
-
-  # to appease CRAN
-  group <- NULL
-
-  dfA$group <- "A"
-  dfB$group <- "B"
-
-  colnames(dfA)[1] <- "exp"
-  colnames(dfB)[1] <- "exp"
-
-  df <- rbind(dfA, dfB)
+  gene.data <- data[gene_name,]
+  
+  df<-data.frame(row.names=colnames(data), group=outcomes, exp=gene.data)
 
   title <- paste(gene_name, "\n", "(emd score = ",
                  round(emd_score, 2), ")", sep="")
