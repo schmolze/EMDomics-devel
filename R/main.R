@@ -204,7 +204,7 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
 
   emd <- cbind(emd, fc, emd.qval)
 
-  EMDomics(data, samplesA, samplesB, emd, emd.perm)
+  EMDomics(data, outcomes, emd, emd.perm)
 
 }
 
@@ -284,9 +284,9 @@ calculate_emd_gene <- function(vec, outcomes, binSize=0.2) {
 #' @return The function combines it's arguments in a list, which is assigned class
 #' 'EMDomics'. The resulting object is returned.
 #' @seealso \code{\link{calculate_emd}}
-EMDomics <- function(data, samplesA, samplesB, emd, emd.perm) {
+EMDomics <- function(data, outcomes, emd, emd.perm) {
 
-  structure(list("data"=data, "samplesA"=samplesA, "samplesB"=samplesB,
+  structure(list("data"=data, "outcomes"=outcomes,
                  "emd"=emd, "emd.perm"=emd.perm),
             class = "EMDomics")
 
