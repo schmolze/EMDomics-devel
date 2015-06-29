@@ -92,34 +92,33 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
   data.df <- as.data.frame(t(data))
   sample_names <- rownames(data.df)
   
+  # ---------- pairwise emd table -----------
+  
+  # generate pairwise emd table for each gene
+  if (verbose)
+    message("Calculating pairwise emd scores...", appendLF=FALSE)
+  
+  emd.tab <- unlist(BiocParallel::bplapply(data.df, .emd_pairwise_table, outcomes,
+                                           binSize,
+                                           BPPARAM = bpparam))
+  emd.tab <- as.matrix(emd.tab)
+  
+  if (verbose)
+    message("done.")
+  
   # ---------- emd ------------
 
   # calculate emd for each gene
   if (verbose)
     message("Calculating emd...", appendLF=FALSE)
 
-  emd <- unlist(BiocParallel::bplapply(data.df, .emd_gene, outcomes,
-                                       binSize,
-                                       BPPARAM = bpparam))
+  emd <- apply(emd.tab, 1, sum)
 
   emd <- as.matrix(emd)
   colnames(emd) <- "emd"
 
   if (verbose)
     message("done.")
-
-  if (verbose)
-    message("Calculating fold change...", appendLF=FALSE)
-
-  fc <- unlist(BiocParallel::bplapply(data.df, .fc, idxA, idxB,
-                                      BPPARAM = bpparam))
-
-  fc <- as.matrix(fc)
-  colnames(fc) <- "fc"
-
-  if (verbose)
-    message("done.")
-
 
   # --------------- permuted emd scores ----------------
 
@@ -196,15 +195,12 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
 
   # leave q-values of 0 as-is
 
-  # adjust q-values of 0 to 1/(nperm+1)
-  #emd.qval[emd.qval == 0] <- 1/(nperm+1)
-
   if (verbose)
     message("done.")
 
-  emd <- cbind(emd, fc, emd.qval)
+  emd <- cbind(emd, emd.qval)
 
-  EMDomics(data, outcomes, emd, emd.perm)
+  EMDomics(data, outcomes, emd, emd.perm, emd.tab)
 
 }
 
@@ -253,6 +249,8 @@ calculate_emd_gene <- function(vec, outcomes, binSize=0.2) {
     EMD <- .emd_gene_pairwise(vec,src.lab,sink.lab,binSize)
     EMDtot <- EMDtot + EMD
   }
+  
+  EMDtot
 }
 
 
@@ -284,21 +282,22 @@ calculate_emd_gene <- function(vec, outcomes, binSize=0.2) {
 #' @return The function combines it's arguments in a list, which is assigned class
 #' 'EMDomics'. The resulting object is returned.
 #' @seealso \code{\link{calculate_emd}}
-EMDomics <- function(data, outcomes, emd, emd.perm) {
+EMDomics <- function(data, outcomes, emd, emd.perm, pairwise.emd) {
 
   structure(list("data"=data, "outcomes"=outcomes,
-                 "emd"=emd, "emd.perm"=emd.perm),
+                 "emd"=emd, "emd.perm"=emd.perm, "pairwise.emd.table"=pairwise.emd),
             class = "EMDomics")
 
 }
 
-# computes all pairwise EMD scores for a single gene
-.emd_gene <- function(geneData, outcomes, binSize) {
+# Creates a table of all the pairwise EMD scores
+.emd_pairwise_table <- function(geneData, outcomes, binSize) {
   
   pairs <- combn(outcomes,2)
   
-  EMDtot <- 0 # holds the sum of all the EMD scores
-  for (p in pairs)
+  EMD.tab <- matrix(NA, nrow=1, ncol=length(pairs))
+  
+  for (p in 1:length(pairs))
   {
     inds <- pairs[p]
     src <- ind[1]
@@ -307,9 +306,14 @@ EMDomics <- function(data, outcomes, emd, emd.perm) {
     src.lab <- names(outcomes[outcomes==src])
     sink.lab <- names(outcomes[outcomes==sink])
     
+    col.name <- paste(src,'vs',sink)
+    colnames(EMD.tab)[p] <- col.name
+    
     EMD <- .emd_gene_pairwise(geneData,src.lab,sink.lab,binSize)
-    EMDtot <- EMDtot + EMD
+    EMD.tab[1,p] <- EMD
   }
+  
+  EMD.tab
 }
 
 # computes pairwise EMD
@@ -328,16 +332,4 @@ EMDomics <- function(data, outcomes, emd, emd.perm) {
   densB <- as.matrix(histB$density)
   
   emdist::emd2d(densA, densB)
-}
-
-# computes log2 fold change -- replace with pairwise EMD
-.fc <- function(geneData, idxA, idxB) {
-
-  dataA <- geneData[idxA]
-  dataB <- geneData[idxB]
-
-  meanA <- mean(dataA)
-  meanB <- mean(dataB)
-
-  log2(2^meanA/2^meanB)
 }
