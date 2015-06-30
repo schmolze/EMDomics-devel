@@ -91,10 +91,19 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
   if (verbose)
     message("Calculating pairwise emd scores...", appendLF=FALSE)
   
-  emd.tab <- BiocParallel::bplapply(data.df, .emd_pairwise_table, sample_names, outcomes,
+  # all possible pairwise comparisons
+  classes <- unique(outcomes)
+  pairs <- combn(classes,2)
+  names <- apply(pairs,2,function(x){paste(x[1],'vs',x[2])})
+  
+  emd.tab <- BiocParallel::bplapply(data.df, .emd_pairwise_table, sample_names, 
+                                           outcomes, pairs,
                                            binSize, verbose,
                                            BPPARAM = bpparam)
-  emd.tab <- as.matrix(unlist(emd.tab))
+  
+  emd.tab <- matrix(unlist(emd.tab), nrow=dim(data.df)[2], byrow=T)
+  rownames(emd.tab) <- colnames(data.df)
+  colnames(emd.tab) <- names
   
   if (verbose)
     message("done.")
@@ -105,7 +114,7 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
   if (verbose)
     message("Calculating emd...", appendLF=FALSE)
   
-  emd <- apply(emd.tab, 1, function(x){sum(as.numeric(unlist(x)))})
+  emd <- apply(emd.tab, 1, function(x){sum(as.numeric(x))})
 
   emd <- as.matrix(emd)
   colnames(emd) <- "emd"
@@ -135,7 +144,7 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
     data.perm <- data.df[idx.perm, ]
 
     # calculate emd for permuted samples
-    emd.perm[, i] <- unlist(BiocParallel::bplapply(data.perm, .emd_gene,
+    emd.perm[, i] <- unlist(BiocParallel::bplapply(data.perm, calculate_emd_gene,
                                                    outcomes,
                                                    binSize,
                                                    BPPARAM = bpparam))
@@ -286,12 +295,9 @@ EMDomics <- function(data, outcomes, emd, emd.perm, pairwise.emd) {
 }
 
 # Creates a table of all the pairwise EMD scores for one gene
-.emd_pairwise_table <- function(geneData, sample_names, outcomes, binSize, verbose) {
+.emd_pairwise_table <- function(geneData, sample_names, outcomes, pairs, binSize, verbose) {
   
   names(geneData) <- sample_names
-  
-  classes <- unique(outcomes)
-  pairs <- combn(classes,2)
   
   EMD.tab <- matrix(NA, nrow=1, ncol=dim(pairs)[2])
   colnames<-list()
@@ -312,8 +318,10 @@ EMDomics <- function(data, outcomes, emd, emd.perm, pairwise.emd) {
     EMD.tab[1,p] <- EMD
   }
 
-  colnames(EMD.tab)<-colnames
-  as.numeric(EMD.tab)
+  EMD.tab <- as.numeric(EMD.tab)
+  names(EMD.tab) <- colnames
+  
+  EMD.tab
 }
 
 # computes pairwise EMD
