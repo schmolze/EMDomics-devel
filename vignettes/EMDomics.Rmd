@@ -51,8 +51,6 @@ We shouldn't expect the three groups to look too different, since we're just sam
 
 ```{r}
 library(EMDomics)
-names(exp_data)
-labels
 calculate_emd_gene(exp_data, labels, names(exp_data))
 ```
 
