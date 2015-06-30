@@ -114,7 +114,7 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
   if (verbose)
     message("Calculating emd...", appendLF=FALSE)
   
-  emd <- apply(emd.tab, 1, function(x){sum(as.numeric(x))})
+  emd <- apply(emd.tab, 1, function(x){mean(as.numeric(x))})
 
   emd <- as.matrix(emd)
   colnames(emd) <- "emd"
@@ -161,7 +161,7 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
   if (verbose)
     message("Calculating q-values...", appendLF=FALSE)
 
-  perm.medians <- matrixStats::rowMedians(emd.perm)
+  perm.medians <- apply(emd.perm,1,function(x){median(x)})
 
   # generate thresholds and qval matrix
   thr_upper <- ceiling(max(emd))
@@ -264,7 +264,7 @@ calculate_emd_gene <- function(vec, outcomes, sample_names, binSize=0.2) {
   EMD.tab <- as.numeric(EMD.tab)
   names(EMD.tab) <- colnames
   
-  sum(EMD.tab)
+  mean(EMD.tab)
 }
 
 
