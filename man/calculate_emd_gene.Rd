@@ -4,7 +4,7 @@
 \alias{calculate_emd_gene}
 \title{Calculate EMD score for a single gene}
 \usage{
-calculate_emd_gene(vec, outcomes, binSize = 0.2)
+calculate_emd_gene(vec, outcomes, sample_names, binSize = 0.2)
 }
 \arguments{
 \item{vec}{A named vector containing data (e.g. expression data) for a single
@@ -12,6 +12,8 @@ gene.}
 
 \item{outcomes}{A vector of group labels for the samples. The names must correspond
 to the names of \code{vec}.}
+
+\item{sample_names}{A character vector with the names of the samples in \code{vec}.}
 
 \item{binSize}{The bin size to be used when generating histograms for each of the groups.}
 }
