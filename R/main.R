@@ -144,11 +144,13 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
     data.perm <- data.df[idx.perm, ]
 
     # calculate emd for permuted samples
-    emd.perm[, i] <- unlist(BiocParallel::bplapply(data.perm, calculate_emd_gene,
-                                                   outcomes,
+    perm.val <- BiocParallel::bplapply(data.perm, calculate_emd_gene,
+                                                   outcomes, sample_names,
                                                    binSize,
-                                                   BPPARAM = bpparam))
-
+                                                   BPPARAM = bpparam)
+  
+    emd.perm[,i] <- unlist(perm.val)
+    
     if (verbose)
       message("done.")
 
@@ -220,6 +222,7 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
 #' gene.
 #' @param outcomes A vector of group labels for the samples. The names must correspond
 #' to the names of \code{vec}.
+#' @param sample_names A character vector with the names of the samples in \code{vec}.
 #' @param binSize The bin size to be used when generating histograms for each of the groups.
 #' @return The emd score is returned.
 #' 
@@ -235,25 +238,33 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
 #' calculate_emd_gene(vec, outcomes)
 #' 
 #' @seealso \code{\link[emdist]{emd2d}}
-calculate_emd_gene <- function(vec, outcomes, binSize=0.2) {
+calculate_emd_gene <- function(vec, outcomes, sample_names, binSize=0.2) {
 
-  pairs <- combn(outcomes,2)
+  names(vec) <- sample_names
   
-  EMDtot <- 0 # holds the sum of all the EMD scores
+  classes <- unique(outcomes)
+  pairs <- combn(classes,2)
+  
+  EMD.tab <- matrix(NA, nrow=1, ncol=dim(pairs)[2])
+  colnames<-list()
+  
   for (p in 1:dim(pairs)[2])
   {
     inds <- pairs[,p]
-    src <- ind[1]
-    sink <- ind[2]
+    src <- inds[1]
+    sink <- inds[2]
     
     src.lab <- names(outcomes[outcomes==src])
     sink.lab <- names(outcomes[outcomes==sink])
     
     EMD <- .emd_gene_pairwise(vec,src.lab,sink.lab,binSize)
-    EMDtot <- EMDtot + EMD
+    EMD.tab[1,p] <- EMD
   }
   
-  EMDtot
+  EMD.tab <- as.numeric(EMD.tab)
+  names(EMD.tab) <- colnames
+  
+  sum(EMD.tab)
 }
 
 
