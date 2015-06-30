@@ -145,7 +145,7 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
 
     # calculate emd for permuted samples
     perm.val <- BiocParallel::bplapply(data.perm, calculate_emd_gene,
-                                                   outcomes, sample_names,
+                                                   outcomes, rownames(data.perm),
                                                    binSize,
                                                    BPPARAM = bpparam)
   
@@ -239,8 +239,8 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
 #' 
 #' @seealso \code{\link[emdist]{emd2d}}
 calculate_emd_gene <- function(vec, outcomes, sample_names, binSize=0.2) {
-
-  names(outcomes) <- sample_names
+  
+  names(vec) <- sample_names
   
   classes <- unique(outcomes)
   pairs <- combn(classes,2)
