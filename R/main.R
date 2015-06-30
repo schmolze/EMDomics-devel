@@ -240,7 +240,7 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
 #' @seealso \code{\link[emdist]{emd2d}}
 calculate_emd_gene <- function(vec, outcomes, sample_names, binSize=0.2) {
 
-  names(vec) <- sample_names
+  names(outcomes) <- sample_names
   
   classes <- unique(outcomes)
   pairs <- combn(classes,2)
