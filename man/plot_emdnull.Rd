@@ -28,8 +28,9 @@ colnames(dat) <- paste("sample", 1:100, sep="")
 
 # "group A" = first 50, "group B" = second 50
 groups <- c(rep("A",50),rep("B",50))
+names(groups) <- colnames(dat)
 
-results <- calculate_emd(dat, groups, nperm=10)
+results <- calculate_emd(dat, groups, nperm=10, parallel=FALSE)
 plot_emdnull(results)
 }
 \seealso{

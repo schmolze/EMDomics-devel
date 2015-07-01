@@ -41,7 +41,7 @@ colnames(dat) <- paste("sample", 1:100, sep="")
 outcomes <- c(rep("A",50), rep("B",30), rep("C",20))
 names(outcomes) <- colnames(dat)
 
-calculate_emd_gene(vec, outcomes, colnames(dat))
+calculate_emd_gene(dat[1,], outcomes, colnames(dat))
 }
 \seealso{
 \code{\link[emdist]{emd2d}}

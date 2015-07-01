@@ -32,6 +32,7 @@ colnames(dat) <- paste("sample", 1:100, sep="")
 
 # "A": first 50 samples; "B": next 30 samples; "C": final 20 samples
 outcomes <- c(rep("A",50), rep("B",30), rep("C",20))
+names(outcomes) <- colnames(dat)
 
 results <- calculate_emd(dat, outcomes, nperm=10, parallel=FALSE)
 plot_density(results, "gene5")

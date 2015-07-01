@@ -16,8 +16,9 @@
 #'
 #' # "group A" = first 50, "group B" = second 50
 #' groups <- c(rep("A",50),rep("B",50))
+#' names(groups) <- colnames(dat)
 #'
-#' results <- calculate_emd(dat, groups, nperm=10)
+#' results <- calculate_emd(dat, groups, nperm=10, parallel=FALSE)
 #' plot_emdnull(results)
 #' @seealso \code{\link{calculate_emd}} \code{\link[ggplot2]{ggplot}}
 plot_emdnull <- function(emdobj) {
@@ -58,6 +59,7 @@ plot_emdnull <- function(emdobj) {
 #'
 #' # "A": first 50 samples; "B": next 30 samples; "C": final 20 samples
 #' outcomes <- c(rep("A",50), rep("B",30), rep("C",20))
+#' names(outcomes) <- colnames(dat)
 #' 
 #' results <- calculate_emd(dat, outcomes, nperm=10, parallel=FALSE)
 #' plot_perms(results)
@@ -103,6 +105,7 @@ plot_perms <- function(emdobj) {
 #'
 #' # "A": first 50 samples; "B": next 30 samples; "C": final 20 samples
 #' outcomes <- c(rep("A",50), rep("B",30), rep("C",20))
+#' names(outcomes) <- colnames(dat)
 #' 
 #' results <- calculate_emd(dat, outcomes, nperm=10, parallel=FALSE)
 #' plot_density(results, "gene5")
@@ -116,6 +119,10 @@ plot_density <- function(emdobj, gene_name) {
   
   emd_score <- emdobj$emd[gene_name, "emd"]
   gene.data <- data[gene_name,]
+  
+  # to appease CRAN
+  group <- NULL
+  exp <- NULL
   
   df<-data.frame(row.names=colnames(data), group=outcomes, exp=gene.data)
 
