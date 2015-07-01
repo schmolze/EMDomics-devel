@@ -22,7 +22,7 @@ Version: 1.2.0
 biocViews: Software, DifferentialExpression, GeneExpression, Microarray
 Authors@R: c( person("Sadhika", "Malladi", email="sadhika.malladi@outlook.com", role=c("aut","cre")),
         person("Daniel", "Schmolze", email="emd@schmolze.com",
-        role=c("aut", "cre")), person("Andrew", "Beck",
+        role="aut"), person("Andrew", "Beck",
         email="abeck2@bidmc.harvard.edu", role="aut"), person("Sheida",
         "Nabavi", email="sheida_nabavi@hms.harvard.edu", role="aut"))
 Maintainer: Daniel Schmolze <emd@schmolze.com>
@@ -33,5 +33,5 @@ License: MIT + file LICENSE
 LazyData: true
 VignetteBuilder: knitr
 NeedsCompilation: no
-Author: Daniel Schmolze [aut, cre], Andrew Beck [aut], Sheida Nabavi
+Author: Sadhika Malladi [aut, cre], Daniel Schmolze [aut], Andrew Beck [aut], Sheida Nabavi
         [aut]
