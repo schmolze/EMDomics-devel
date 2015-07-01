@@ -60,7 +60,7 @@ calculate_emd_gene(exp_data, labels, names(exp_data))
 ```
 
 ```
-## [1] 1.377778
+## [1] 1.504444
 ```
 
 Now we'll modify the expression data for `group A` and see how the EMD score changes. We'll randomly add or subtract 2 from each data point in `group A`:
@@ -91,7 +91,7 @@ calculate_emd_gene(exp_data2, labels, names(exp_data2))
 ```
 
 ```
-## [1] 4.864444
+## [1] 4.911111
 ```
 
 The EMD score is larger, reflecting the increased work needed to transform one distribution into another. Note that since we have three classes defined, we aren't able to tell from the EMD score alone which two groups (or, potentially, all three groups) demonstrate differences in gene behavior. The composite EMD score in a multi-class analysis is the average of all the pairwise EMD scores. The pairwise EMD scores are computed by comparing all possible combinations of two of the classes. More information on multi-class analysis is in the next section.
@@ -134,12 +134,12 @@ head(emd)
 
 ```
 ##            emd q-value
-## gene1 1.062222       1
-## gene2 1.542222       1
-## gene3 1.564444       1
-## gene4 0.980000       1
-## gene5 1.777778       1
-## gene6 2.295556       1
+## gene1 1.724444       1
+## gene2 1.460000       1
+## gene3 1.504444       1
+## gene4 2.233333       1
+## gene5 2.762222       1
+## gene6 1.520000       1
 ```
 
 This matrix lists the emd score and the q-value for each gene in the data set. Because we're not analyzing many genes and the data is randomly generated, there may be some significant q-values in the results simply by chance. We can order the `emd` matrix by q-value:
@@ -152,12 +152,12 @@ head(emd2)
 
 ```
 ##            emd q-value
-## gene1 1.062222       1
-## gene2 1.542222       1
-## gene3 1.564444       1
-## gene4 0.980000       1
-## gene5 1.777778       1
-## gene6 2.295556       1
+## gene1 1.724444       1
+## gene2 1.460000       1
+## gene3 1.504444       1
+## gene4 2.233333       1
+## gene5 2.762222       1
+## gene6 1.520000       1
 ```
 
 Note the correlation of significant q-values with relatively large EMD scores.
@@ -172,12 +172,12 @@ head(emd.pairwise)
 
 ```
 ##       A vs B   A vs C   B vs C
-## gene1   0.89 1.246667 1.050000
-## gene2   1.02 1.573333 2.033333
-## gene3   1.66 1.000000 2.033333
-## gene4   0.77 1.020000 1.150000
-## gene5   2.02 2.180000 1.133333
-## gene6   2.59 2.913333 1.383333
+## gene1   2.32 1.420000 1.433333
+## gene2   2.02 0.660000 1.700000
+## gene3   1.50 1.546667 1.466667
+## gene4   1.67 2.446667 2.583333
+## gene5   3.80 1.920000 2.566667
+## gene6   1.37 1.073333 2.116667
 ```
 
 # Visualization
@@ -260,7 +260,7 @@ This concludes the **EMDomics** vignette. For additional information, please con
 ## [19] htmltools_0.2.6      rversions_1.0.1      matrixStats_0.14.1  
 ## [22] yaml_2.1.13          digest_0.6.8         formatR_1.2         
 ## [25] reshape2_1.4.1       futile.options_1.0.0 curl_0.9            
-## [28] evaluate_0.7         memoise_0.2.1        rmarkdown_0.7       
-## [31] labeling_0.3         stringi_0.5-2        scales_0.2.5        
-## [34] emdist_0.3-1         proto_0.3-10
+## [28] mime_0.3             evaluate_0.7         memoise_0.2.1       
+## [31] rmarkdown_0.7        labeling_0.3         stringi_0.5-2       
+## [34] scales_0.2.5         emdist_0.3-1         proto_0.3-10
 ```
