@@ -62,7 +62,7 @@ mod_vec <- sample(c(2,-2), 50, replace=TRUE)
 exp_data2[1:50] <- exp_data2[1:50] + mod_vec
 ```
 
-Let's again visualize the two distributions and calculate the EMD score:
+Let's again visualize the distributions and calculate the EMD score:
 
 ```{r}
 df <- as.data.frame(exp_data2)
@@ -77,9 +77,11 @@ calculate_emd_gene(exp_data2, labels, names(exp_data2))
 
 The EMD score is larger, reflecting the increased work needed to transform one distribution into another. Note that since we have three classes defined, we aren't able to tell from the EMD score alone which two groups (or, potentially, all three groups) demonstrate differences in gene behavior. The composite EMD score in a multi-class analysis is the average of all the pairwise EMD scores. The pairwise EMD scores are computed by comparing all possible combinations of two of the classes. More information on multi-class analysis is in the next section.
 
+Note that in a two-class analysis, a greater EMD score is directly indicative of a greater difference between the measurement distributions of the two classes.
+
 # Analyzing Significance
 
-The EMD score increases as the two distributions become increasingly dissimilar, but we have no framework for estimating the significance of a particular EMD score. **EMDomics** uses a permutation-based method to calculate a q-value that is interpreted analogously to a p-value. To access the full functionality of the package, we'll use the function `calculate_emd`. 
+The EMD score increases as the distributions become increasingly dissimilar, but we have no framework for estimating the significance of a particular EMD score. **EMDomics** uses a permutation-based method to calculate a q-value that is interpreted analogously to a p-value. To access the full functionality of the package, we'll use the function `calculate_emd`. 
 
 We'll first create a matrix of gene expression data for 100 samples (tumors, patients, etc.) and 100 genes. We'll just sample from the normal distribution for now. The first 50 samples will be our "group A," second 20 will be "group B," and the final 30 will be "group C." Just as before, we will store these sample labels in a named vector associating group with sample identifier:
 

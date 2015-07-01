@@ -37,7 +37,7 @@ NULL
 #' The EMD-based algorithm implemented in \pkg{EMDomics} has two main steps.
 #' First, a matrix (e.g. of expression data) is divided into data for each of the groups.
 #' Every possible pairwise EMD score is then computed and stored in a table. The EMD score
-#' for a single gene is calculated by summing all of the pairwise EMD scores.
+#' for a single gene is calculated by averaging all of the pairwise EMD scores.
 #' Next, the labels for each of the groups are randomly
 #' permuted a specified number of times, and an EMD score for each permutation is
 #' calculated. The median of the permuted scores for each gene is used as
