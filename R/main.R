@@ -101,7 +101,7 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
                                            binSize, verbose,
                                            BPPARAM = bpparam)
   
-  emd.tab <- matrix(unlist(emd.tab), nrow=dim(data.df)[2], byrow=T)
+  emd.tab <- matrix(unlist(emd.tab), nrow=dim(data.df)[2], byrow=TRUE)
   rownames(emd.tab) <- colnames(data.df)
   colnames(emd.tab) <- names
   

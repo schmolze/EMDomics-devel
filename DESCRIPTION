@@ -18,9 +18,10 @@ Description: The EMDomics algorithm is used to perform a supervised
         providing a metric of the overall difference in shape between
         two distributions. Permutation of sample labels is used to
         generate q-values for the observed EMD scores.
-Version: 1.1.0
+Version: 1.2.0
 biocViews: Software, DifferentialExpression, GeneExpression, Microarray
-Authors@R: c( person("Daniel", "Schmolze", email="emd@schmolze.com",
+Authors@R: c( person("Sadhika", "Malladi", email="sadhika.malladi@outlook.com", role=c("aut","cre")),
+        person("Daniel", "Schmolze", email="emd@schmolze.com",
         role=c("aut", "cre")), person("Andrew", "Beck",
         email="abeck2@bidmc.harvard.edu", role="aut"), person("Sheida",
         "Nabavi", email="sheida_nabavi@hms.harvard.edu", role="aut"))
