@@ -229,7 +229,7 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
 #' 
 #' @examples
 #' # 100 genes, 100 samples
-#' dat <- matrix(rnorm(10000), nrow=100, ncol=100)
+#' dat <- as.numeric(rnorm(10000))
 #' rownames(dat) <- paste("gene", 1:100, sep="")
 #' colnames(dat) <- paste("sample", 1:100, sep="")
 #'
@@ -237,7 +237,7 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
 #' outcomes <- c(rep("A",50), rep("B",30), rep("C",20))
 #' names(outcomes) <- colnames(dat)
 #'
-#' calculate_emd_gene(vec, outcomes, colnames(dat))
+#' calculate_emd_gene(dat, outcomes, colnames(dat))
 #' 
 #' @seealso \code{\link[emdist]{emd2d}}
 calculate_emd_gene <- function(vec, outcomes, sample_names, binSize=0.2) {
