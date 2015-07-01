@@ -235,6 +235,7 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
 #'
 #' # "A": first 50 samples; "B": next 30 samples; "C": final 20 samples
 #' outcomes <- c(rep("A",50), rep("B",30), rep("C",20))
+#' names(outcomes) <- colnames(dat)
 #'
 #' calculate_emd_gene(vec, outcomes, colnames(dat))
 #' 
