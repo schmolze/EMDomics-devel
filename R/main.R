@@ -235,7 +235,7 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
 #' # "A": first 50 samples; "B": next 30 samples; "C": final 20 samples
 #' outcomes <- c(rep("A",50), rep("B",30), rep("C",20))
 #'
-#' calculate_emd_gene(vec, outcomes)
+#' calculate_emd_gene(vec, outcomes, colnames(dat))
 #' 
 #' @seealso \code{\link[emdist]{emd2d}}
 calculate_emd_gene <- function(vec, outcomes, sample_names, binSize=0.2) {
@@ -297,10 +297,10 @@ calculate_emd_gene <- function(vec, outcomes, sample_names, binSize=0.2) {
 #' 'EMDomics'. The resulting object is returned.
 #' 
 #' @seealso \code{\link{calculate_emd}}
-EMDomics <- function(data, outcomes, emd, emd.perm, pairwise.emd) {
+EMDomics <- function(data, outcomes, emd, emd.perm, pairwise.emd.table) {
 
   structure(list("data"=data, "outcomes"=outcomes,
-                 "emd"=emd, "emd.perm"=emd.perm, "pairwise.emd.table"=pairwise.emd),
+                 "emd"=emd, "emd.perm"=emd.perm, "pairwise.emd.table"=pairwise.emd.table),
             class = "EMDomics")
 
 }
