@@ -102,7 +102,18 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
                                            binSize, verbose,
                                            BPPARAM = bpparam)
   
-  emd.tab <- matrix(unlist(emd.tab), nrow=dim(data.df)[2], byrow=TRUE)
+  # Remove genes that were not binned properly by the histogram
+  lengths <- lapply(emd.tab, function(x){length(x)})
+  remove.genes <- lengths < ncol(pairs)
+  bad.lengths <- lengths[remove.genes]
+  for (b in names(bad.lengths)) {
+    msg <- paste('Data for gene', b, 'has been removed because it could not be binned properly.')
+    message(msg)
+  }
+  emd.tab <- emd.tab[!remove.genes]
+  data.df <- data.df[,!remove.genes]
+  
+  emd.tab <- matrix(unlist(emd.tab), nrow=ncol(data.df), ncol=ncol(pairs), byrow=TRUE)
   rownames(emd.tab) <- colnames(data.df)
   colnames(emd.tab) <- names
   
@@ -264,7 +275,6 @@ calculate_emd_gene <- function(vec, outcomes, sample_names, binSize=0.2) {
   }
   
   EMD.tab <- as.numeric(EMD.tab)
-  names(EMD.tab) <- colnames
   
   mean(EMD.tab)
 }
@@ -324,15 +334,11 @@ EMDomics <- function(data, outcomes, emd, emd.perm, pairwise.emd.table) {
     src.lab <- names(outcomes[outcomes==src])
     sink.lab <- names(outcomes[outcomes==sink])
     
-    col.name <- as.character(paste(src,'vs',sink))
-    colnames<-c(colnames,col.name)
-    
     EMD <- .emd_gene_pairwise(geneData,src.lab,sink.lab,binSize)
     EMD.tab[1,p] <- EMD
   }
 
   EMD.tab <- as.numeric(EMD.tab)
-  names(EMD.tab) <- colnames
   
   EMD.tab
 }
