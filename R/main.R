@@ -153,11 +153,13 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
 
     # permute samples
     idx.perm <- sample(1:sample_count, replace=FALSE)
-    data.perm <- data.df[idx.perm, ]
+    sample.id <- names(outcomes)
+    outcomes.perm <- outcomes[idx.perm]
+    names(outcomes.perm) <- sample.id
 
     # calculate emd for permuted samples
-    perm.val <- BiocParallel::bplapply(data.perm, calculate_emd_gene,
-                                                   outcomes, rownames(data.perm),
+    perm.val <- BiocParallel::bplapply(data.df, calculate_emd_gene,
+                                                   outcomes.perm, rownames(data.df),
                                                    binSize,
                                                    BPPARAM = bpparam)
   
