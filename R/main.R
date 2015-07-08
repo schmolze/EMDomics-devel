@@ -163,7 +163,7 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
                                                    binSize,
                                                    BPPARAM = bpparam)
   
-    emd.perm[,i] <- unlist(perm.val)
+    emd.perm[,i] <- unlist(sapply(perm.val,"[",1))
     
     if (verbose)
       message("done.")
