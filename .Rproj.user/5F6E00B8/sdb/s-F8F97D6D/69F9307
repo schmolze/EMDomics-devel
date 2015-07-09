@@ -1,0 +1,17 @@
+{
+    "contents" : "# Re-write multi-class simulations\n\n# 3 Classes ---------------------------------------------------------------\n# Class 1 (80): Homogeneous, same distribution\n# Class 2 (120): Two random processes\n# Class 3 (100): Three random processes\ndata.1 <- matrix(rnorm(80000, mean=20), ncol=80, nrow=1000)\ndata.2 <- matrix(rnorm(120000, mean=24), ncol=120, nrow=1000)\ndata.3 <- matrix(rnorm(100000, mean=28), ncol=100, nrow=1000)\ndata <- cbind(data.1, data.2, data.3)\nnorm <- matrix(rnorm(300000, mean=20), ncol=300, nrow=1000)\ndata <- rbind(data,norm)\ncolnames(data) <- paste('sample',1:300)\nrownames(data) <- paste('gene', 1:2000)\nlabels <- c(rep(1,80), rep(2,120), rep(3,100))\nnames(labels) <- colnames(data)\n\nemd <- calculate_emd(data, labels)\n",
+    "created" : 1436290892383.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "537168203",
+    "id" : "69F9307",
+    "lastKnownWriteTime" : 1436292242,
+    "path" : "~/EMD/Multi-Class.R",
+    "project_path" : null,
+    "properties" : {
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "type" : "r_source"
+}
