@@ -2,31 +2,31 @@ Package: EMDomics
 Title: Earth Mover's Distance for Differential Analysis of Genomics
         Data
 Description: The EMDomics algorithm is used to perform a supervised
-        two-class analysis to measure the magnitude and statistical
-        significance of observed continuous genomics data between two
+        multi-class analysis to measure the magnitude and statistical
+        significance of observed continuous genomics data between 
         groups. Usually the data will be gene expression values from
         array-based or sequence-based experiments, but data from other
         types of experiments can also be analyzed (e.g. copy number
         variation). Traditional methods like Significance Analysis of
         Microarrays (SAM) and Linear Models for Microarray Data (LIMMA)
         use significance tests based on summary statistics (mean and
-        standard deviation) of the two distributions. This approach
+        standard deviation) of the distributions. This approach
         lacks power to identify expression differences between groups
         that show high levels of intra-group heterogeneity. The Earth
         Mover's Distance (EMD) algorithm instead computes the "work"
-        needed to transform one distribution into the other, thus
+        needed to transform one distribution into another, thus
         providing a metric of the overall difference in shape between
         two distributions. Permutation of sample labels is used to
         generate q-values for the observed EMD scores.
-Version: 2.0.0
+Version: 1.1.1
 biocViews: Software, DifferentialExpression, GeneExpression, Microarray
-Authors@R: c( person("Sadhika", "Malladi", email="sadhika.malladi@outlook.com", role=c("aut","cre")),
+Authors@R: c( person("Sadhika", "Malladi", email="emd.malladi@schmolze.com", role=c("aut","cre")),
         person("Daniel", "Schmolze", email="emd@schmolze.com",
         role=c("aut","cre")), person("Andrew", "Beck",
         email="abeck2@bidmc.harvard.edu", role="aut"), person("Sheida",
         "Nabavi", email="sheida_nabavi@hms.harvard.edu", role="aut"))
-Maintainer: Sadhika Malladi <sadhika.malladi@outlook.com> and Daniel Schmolze <emd@schmolze.com>
-Depends: R (>= 3.2.0)
+Maintainer: Sadhika Malladi <emd.malladi@schmolze.com> and Daniel Schmolze <emd@schmolze.com>
+Depends: R (>= 3.2.1)
 Imports: emdist, BiocParallel, matrixStats, ggplot2
 Suggests: knitr
 License: MIT + file LICENSE
