@@ -45,7 +45,7 @@ The data in \code{vec} is divided based on class labels based on the \code{outco
 identifiers given. For each pairwise computation, the \code{\link{hist}} function is
 used to generate histograms for the two groups. The densities are then retrieved
 and passed to  \code{\link[emdist]{emd2d}} to compute the pairwise EMD score. The
-total EMD score for the given data is the sum of the pairwise EMD scores.
+total EMD score for the given data is the average of the pairwise EMD scores.
 
 All possible combinations of the classes are used as pairwise comparisons.
 The data in \code{vec} is divided based on class labels based on the \code{outcomes}

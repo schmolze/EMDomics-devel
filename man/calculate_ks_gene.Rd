@@ -24,10 +24,9 @@ Calculate KS score for a single gene
 \details{
 All possible combinations of the classes are used as pairwise comparisons.
 The data in \code{vec} is divided based on class labels based on the \code{outcomes}
-identifiers given. For each pairwise computation, the \code{\link{hist}} function is
-used to generate histograms for the two groups. The densities are then retrieved
-and passed to  \code{\link{ks.test}} to compute the pairwise KS scores. The
-total KS score for the given data is the sum of the pairwise KS scores.
+identifiers given. For each pairwise computation, \code{\link{ks.test}} is used to compute
+the pairwise KS scores. The
+total KS score for the given data is the average of the pairwise KS scores.
 }
 \examples{
 # 100 genes, 100 samples
@@ -39,9 +38,9 @@ colnames(dat) <- paste("sample", 1:100, sep="")
 outcomes <- c(rep("A",50), rep("B",30), rep("C",20))
 names(outcomes) <- colnames(dat)
 
-calculate_emd_gene(dat[1,], outcomes, colnames(dat))
+calculate_ks_gene(dat[1,], outcomes, colnames(dat))
 }
 \seealso{
-\code{\link[emdist]{emd2d}}
+\code{\link{ks.test}}
 }
 

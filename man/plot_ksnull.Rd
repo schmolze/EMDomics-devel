@@ -16,8 +16,8 @@ A \code{\link[ggplot2]{ggplot}} object is returned. If the value is
 not assigned, a plot will be drawn.
 }
 \description{
-The median of the randomly permuted ks scores (i.e. the null
-distribution) is plotted on the x-axis, vs. the observed ks scores on the
+The median of the randomly permuted KS scores (i.e. the null
+distribution) is plotted on the x-axis, vs. the observed KS scores on the
 y-axis. The line \code{y=x} is superimposed.
 }
 \examples{

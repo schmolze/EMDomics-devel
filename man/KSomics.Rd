@@ -18,7 +18,7 @@ names of this vector must correspond to the column names of \code{data}.}
 the following columns:
 \itemize{
 \item \code{ks} The calculated KS score.
-\item \code{q-value} The calculated q-value (by permutations).
+\item \code{q-value} The calculated q-value (by permutation analysis).
 }
 The row names should specify the gene identifiers for each row.}
 
@@ -26,10 +26,14 @@ The row names should specify the gene identifiers for each row.}
 with a column containing KS scores for each random permutation calculated
 via \code{\link{calculate_ks}}.}
 
-\item{pairwise.ks.table}{A table containing the KS scores for each pairwise
+\item{pairwise.ks.score}{A table containing the KS scores for each pairwise
 comparison for each gene. For a two-class problem, there should be only one column
 comparing class 1 and class 2. The row names should be gene identifiers. The column
 names should be in the format "<class 1> vs <class 2>" (e.g. "1 vs 2" or "A vs B").}
+
+\item{pairwise.ks.q}{A table of the same dimensions as \code{pairwise.ks.score} with
+the q-values for the pairwise comparisons. Q-values are computed by adjusting the p-value
+using the Benjamini-Hochberg method within each pairwise comparison.}
 }
 \value{
 The function combines its arguments in a list, which is assigned class

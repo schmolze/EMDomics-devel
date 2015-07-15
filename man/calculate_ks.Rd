@@ -23,11 +23,10 @@ scores to be computed. Defaults to 100.}
 the \pkg{BiocParallel} package. Defaults to \code{TRUE}.}
 }
 \value{
-The function returns an \code{\link{EMDomics}} object.
+The function returns an \code{\link{KSomics}} object.
 }
 \description{
-This is the main user interface to the \pkg{EMDomics} package, and
-will usually the only function needed when conducting an analysis using the Komolgorov-Smirnov
+This is only function needed when conducting an analysis using the Komolgorov-Smirnov
 algorithm. Analyses can also be conducted with the EMD algorithm using
 \code{calculate_emd}.
 
@@ -62,6 +61,19 @@ that minimizes the FDR is defined as the q-value, and is used to interpret
 the significance of the EMD score analogously to a p-value (e.g. q-value
 < 0.05 = significant). The q-values returned by the KS test (and adjusted for multiple
 significance testing) can be compared to the permuted q-values.
+}
+\examples{
+# 100 genes, 100 samples
+dat <- matrix(rnorm(10000), nrow=100, ncol=100)
+rownames(dat) <- paste("gene", 1:100, sep="")
+colnames(dat) <- paste("sample", 1:100, sep="")
+
+# "A": first 50 samples; "B": next 30 samples; "C": final 20 samples
+outcomes <- c(rep("A",50), rep("B",30), rep("C",20))
+names(outcomes) <- colnames(dat)
+
+results <- calculate_ks(dat, outcomes, nperm=10, parallel=FALSE)
+head(results$ks)
 }
 \seealso{
 \code{\link{EMDomics}} \code{\link{ks.test}}
