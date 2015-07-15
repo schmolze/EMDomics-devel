@@ -77,7 +77,218 @@ calculate_ks <- function(data, outcomes, nperm=100,
                                     outcomes, pairs, verbose,
                                     BPPARAM = bpparam)
   
-  matrix(unlist(ks.tab), nrow=ncol(data.df), ncol=ncol(pairs)*2, byrow=TRUE)
+  # first column has p-value
+  # second column has test statistics
+  # alternating pattern
+  ks.tab <- matrix(unlist(ks.tab), nrow=ncol(data.df), ncol=ncol(pairs)*2, byrow=TRUE)
+  
+  ks.p <- ks.tab[,seq(1,ncol(pairs)*2,2)]
+  ks.stat <- ks.tab[,seq(2,ncol(pairs)*2,2)]
+  
+  if (verbose)
+    message("done.")
+  
+  # adjust p-values using BH/FDR by each pairwise comparison
+  if (verbose)
+    message("Adjusting p-values with B-H method by pairwise comparison...", appendLF=FALSE)
+  ks.p <- apply(ks.p,2,function(x){ p.adjust(x, method='fdr') })
+  if (verbose)
+    message("done.")
+  
+  rownames(ks.p) <- colnames(data.df)
+  rownames(ks.stat) <- colnames(data.df)
+  colnames(ks.p) <- names
+  stat.names <- paste("KS Test Statistic:",names)
+  colnames(ks.stat) <- stat.names
+  
+  # ------------------ aggregate ks for each gene (mean) -----------------------
+  if (verbose)
+    message("Calculating KS...", appendLF=FALSE)
+  
+  ks <- apply(ks.stat, 1, function(x){mean(as.numeric(x))})
+  
+  ks <- as.matrix(ks)
+  rownames(ks) <- colnames(data.df)
+  colnames(ks) <- 'KS'
+  
+  if (verbose)
+    message("done.")
+  
+  # ------------------ permuted ks value ------------------------
+  sample_count <- length(outcomes)
+  
+  # matrix to hold permuted ks values
+  ks.perm <- matrix(nrow=ncol(data.df), ncol=nperm)
+  rownames(ks.perm) <- colnames(data.df)
+  colnames(ks.perm) <- as.character(1:nperm)
+  
+  for (i in 1:nperm) {
+    
+    msg <- paste("Calculating permuted ks #", i, " of ",
+                 nperm, "...", sep="")
+    
+    if (verbose)
+      message(msg, appendLF=FALSE)
+    
+    # permute samples
+    idx.perm <- sample(1:sample_count, replace=FALSE)
+    sample.id <- names(outcomes)
+    outcomes.perm <- outcomes[idx.perm]
+    names(outcomes.perm) <- sample.id
+    
+    # calculate emd for permuted samples
+    perm.val <- BiocParallel::bplapply(data.df, calculate_ks_gene,
+                                       rownames(data.df), outcomes.perm,
+                                       BPPARAM = bpparam)
+    
+    ks.perm[,i] <- unlist(sapply(perm.val,"[",1))
+    
+    if (verbose)
+      message("done.")
+  }
+  
+  # -------------- calculate permutation-based q-values ------------------
+  if (verbose)
+    message("Calculating q-values...", appendLF=FALSE)
+  
+  perm.medians <- apply(ks.perm,1,function(x){median(x)})
+  
+  # generate thresholds and qval matrix
+  thr_upper <- ceiling(max(ks))
+  thr <- seq(thr_upper, 0, by = -0.001)
+  qvals <- matrix(1, nrow=nrow(ks), ncol=length(thr))
+  
+  colnames(qvals) <- thr
+  rownames(qvals) <- rownames(ks)
+  
+  # calculate fdr at each threshold
+  j <- 0
+  for (d in thr) {
+    
+    j <- j+1
+    
+    # calculate true discoveries at this threshold
+    idx <- which(ks > d)
+    n.signif <- length(idx)
+    genes.signif <- rownames(ks)[idx]
+    
+    # calculate false discoveries at this threshold
+    idx <- which(perm.medians > d)
+    n.fd <- length(idx)
+    
+    fdr <- n.fd/n.signif
+    qvals[genes.signif, j] <- fdr
+    
+  }
+  
+  # final q-value = smallest fdr
+  ks.qval <- apply(qvals, 1, min)
+  
+  ks.qval <- as.matrix(ks.qval)
+  colnames(ks.qval) <- "permutation q-value"
+  
+  # leave q-values of 0 as-is
+  
+  if (verbose)
+    message("done.")
+  
+  ks <- cbind(ks, ks.qval)
+  pairwise.tab <- cbind(ks.p,ks.stat)
+  
+  KSomics(data, outcomes, ks, ks.perm, ks.stat, ks.p)
+}
+
+#' @export
+#' @title Calculate KS score for a single gene
+#' @details All possible combinations of the classes are used as pairwise comparisons.
+#' The data in \code{vec} is divided based on class labels based on the \code{outcomes}
+#' identifiers given. For each pairwise computation, the \code{\link{hist}} function is
+#' used to generate histograms for the two groups. The densities are then retrieved
+#' and passed to  \code{\link{ks.test}} to compute the pairwise KS scores. The 
+#' total KS score for the given data is the sum of the pairwise KS scores.
+#' 
+#' @param vec A named vector containing data (e.g. expression data) for a single
+#' gene.
+#' @param outcomes A vector of group labels for the samples. The names must correspond
+#' to the names of \code{vec}.
+#' @param sample_names A character vector with the names of the samples in \code{vec}.
+#' @return The KS score is returned.
+#' 
+#' @examples
+#' # 100 genes, 100 samples
+#' dat <- matrix(rnorm(10000), nrow=100, ncol=100)
+#' rownames(dat) <- paste("gene", 1:100, sep="")
+#' colnames(dat) <- paste("sample", 1:100, sep="")
+#'
+#' # "A": first 50 samples; "B": next 30 samples; "C": final 20 samples
+#' outcomes <- c(rep("A",50), rep("B",30), rep("C",20))
+#' names(outcomes) <- colnames(dat)
+#'
+#' calculate_emd_gene(dat[1,], outcomes, colnames(dat))
+#' 
+#' @seealso \code{\link[emdist]{emd2d}}
+calculate_ks_gene <- function(geneData, sample_names, outcomes) {
+  
+  names(geneData) <- sample_names
+  
+  classes <- unique(outcomes)
+  pairs <- combn(classes,2)
+  
+  KS.tab <- matrix(NA, nrow=1, ncol=ncol(pairs))
+  
+  for (p in 1:ncol(pairs))
+  {
+    inds <- pairs[,p]
+    src <- inds[1]
+    sink <- inds[2]
+
+    src.lab <- names(outcomes[outcomes==src])
+    sink.lab <- names(outcomes[outcomes==sink])
+    
+    KS <- ks.test(geneData[src.lab],geneData[sink.lab])
+    KS.tab[1,p] <- unname(KS$statistic)
+  }
+  
+  KS.tab <- as.numeric(KS.tab)
+  
+  mean(KS.tab)
+}
+
+#' @export
+#' @title Create an KSomics object
+#' @description This is the constructor for objects of class 'KSomics'. It
+#' is used in \code{\link{calculate_ks}} to construct the return value.
+#' 
+#' @param data A matrix containing genomics data (e.g. gene expression levels).
+#' The rownames should contain gene identifiers, while the column names should
+#' contain sample identifiers.
+#' @param outcomes A vector of group labels for each of the sample identifiers. The
+#' names of this vector must correspond to the column names of \code{data}.
+#' @param ks A matrix containing a row for each gene in \code{data}, and with
+#' the following columns:
+#' \itemize{
+#' \item \code{ks} The calculated KS score.
+#' \item \code{q-value} The calculated q-value (by permutations).
+#' }
+#' The row names should specify the gene identifiers for each row.
+#' @param ks.perm A matrix containing a row for each gene in \code{data}, and
+#' with a column containing KS scores for each random permutation calculated
+#' via \code{\link{calculate_ks}}.
+#' @param pairwise.ks.table A table containing the KS scores for each pairwise
+#' comparison for each gene. For a two-class problem, there should be only one column
+#' comparing class 1 and class 2. The row names should be gene identifiers. The column
+#' names should be in the format "<class 1> vs <class 2>" (e.g. "1 vs 2" or "A vs B").
+#' 
+#' @return The function combines its arguments in a list, which is assigned class
+#' 'KSomics'. The resulting object is returned.
+#' 
+#' @seealso \code{\link{calculate_ks}}
+KSomics <- function(data, outcomes, ks, ks.perm, 
+                        pairwise.ks.score, pairwise.ks.q) {
+  structure(list("data"=data, "outcomes"=outcomes,
+                 "ks"=ks, "ks.perm"=ks.perm, "pairwise.ks.score"=pairwise.ks.score, 
+                 "pairwise.ks.q"=pairwise.ks.q),
+            class = "KSomics")
 }
 
 # table of pairwise K-S results
@@ -85,25 +296,26 @@ calculate_ks <- function(data, outcomes, nperm=100,
                                pairs, verbose) {
   names(geneData) <- sample_names
   
-  KS <- matrix(NA, nrow=1, ncol=ncol(pairs)*2)
+  KS.tab <- matrix(NA, nrow=1, ncol=ncol(pairs)*2)
 
   for (p in 1:ncol(pairs))
   {
     inds <- pairs[,p]
     src <- inds[1]
     sink <- inds[2]
-    
+    cat(src)
+    cat(sink)
     src.lab <- names(outcomes[outcomes==src])
     sink.lab <- names(outcomes[outcomes==sink])
     
-    KS <- .ks_gene_pairwise(geneData,src.lab,sink.lab)
-    KS[1,p] <- KS$p.value
-    KS[1,ncol(pairs)+p] <- unname(KS$statistic)
+    KS <- ks.test(geneData[src.lab],geneData[sink.lab])
+    KS.tab[1,p] <- KS$p.value
+    KS.tab[1,ncol(pairs)+p] <- unname(KS$statistic)
   }
   
-  KS <- as.numeric(KS)
+  KS.tab <- as.numeric(KS.tab)
   
-  KS
+  KS.tab
 }
 
 # pairwise K-S for a single gene
