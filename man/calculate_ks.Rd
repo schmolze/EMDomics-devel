@@ -28,7 +28,7 @@ The function returns an \code{\link{KSomics}} object.
 \description{
 This is only function needed when conducting an analysis using the Komolgorov-Smirnov
 algorithm. Analyses can also be conducted with the EMD algorithm using
-\code{calculate_emd}.
+\code{calculate_emd} or the Cramer Von Mises (CVM) algorithm using \code{calculate_cvm}.
 
 The algorithm is used to compare genomics data between any number of groups.
 Usually the data will be gene expression
@@ -44,7 +44,7 @@ highly heterogeneous, which can be the case in many biological circumstances
 
 Komolgorov-Smirnov instead calculates a test statistic that is the maximum distance between
 two cumulative distribution functions (CDFs). Unlike the EMD score, the KS test statistic
-summarizes only the maximum difference (while EMD considers quantity and distance between
+summarizes only the maximum difference (while EMD considers quantity and distance between all
 differences).
 
 The KS algorithm implemented in \pkg{EMDomics} has two main steps.
