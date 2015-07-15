@@ -48,7 +48,7 @@ NULL
 #' a range of permissive to restrictive significance thresholds. The threshold
 #' that minimizes the FDR is defined as the q-value, and is used to interpret
 #' the significance of the EMD score analogously to a p-value (e.g. q-value
-#' < 0.05 = significant.)
+#' < 0.05 is significant.)
 #'
 #' @param data A matrix containing genomics data (e.g. gene expression levels).
 #' The rownames should contain gene identifiers, while the column names should
