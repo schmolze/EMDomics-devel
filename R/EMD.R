@@ -232,7 +232,7 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
 #' identifiers given. For each pairwise computation, the \code{\link{hist}} function is
 #' used to generate histograms for the two groups. The densities are then retrieved
 #' and passed to  \code{\link[emdist]{emd2d}} to compute the pairwise EMD score. The 
-#' total EMD score for the given data is the sum of the pairwise EMD scores.
+#' total EMD score for the given data is the average of the pairwise EMD scores.
 #' 
 #' @param vec A named vector containing data (e.g. expression data) for a single
 #' gene.

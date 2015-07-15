@@ -1,8 +1,7 @@
 #' @export
 #' @title Calculate the Komolgorov-Smirnov test statistic and q-values.
 #' 
-#' @description This is the main user interface to the \pkg{EMDomics} package, and
-#' will usually the only function needed when conducting an analysis using the Komolgorov-Smirnov
+#' @description This is only function needed when conducting an analysis using the Komolgorov-Smirnov
 #' algorithm. Analyses can also be conducted with the EMD algorithm using
 #' \code{calculate_emd}.
 #'
@@ -48,7 +47,20 @@
 #' @param verbose Boolean specifying whether to display progress messages.
 #' @param parallel Boolean specifying whether to use parallel processing via
 #' the \pkg{BiocParallel} package. Defaults to \code{TRUE}.
-#' @return The function returns an \code{\link{EMDomics}} object.
+#' @return The function returns an \code{\link{KSomics}} object.
+#' 
+#' @examples
+#' # 100 genes, 100 samples
+#' dat <- matrix(rnorm(10000), nrow=100, ncol=100)
+#' rownames(dat) <- paste("gene", 1:100, sep="")
+#' colnames(dat) <- paste("sample", 1:100, sep="")
+#'
+#' # "A": first 50 samples; "B": next 30 samples; "C": final 20 samples
+#' outcomes <- c(rep("A",50), rep("B",30), rep("C",20))
+#' names(outcomes) <- colnames(dat)
+#' 
+#' results <- calculate_ks(dat, outcomes, nperm=10, parallel=FALSE)
+#' head(results$ks)
 #' 
 #' @seealso \code{\link{EMDomics}} \code{\link{ks.test}}
 calculate_ks <- function(data, outcomes, nperm=100, 
@@ -64,7 +76,7 @@ calculate_ks <- function(data, outcomes, nperm=100,
   
   # ---------- pairwise ks table: test statistic and p-value -----------
   
-  # generate pairwise emd table for each gene
+  # generate pairwise ks table for each gene
   if (verbose)
     message("Calculating pairwise KS scores and p-values...", appendLF=FALSE)
   
@@ -136,7 +148,7 @@ calculate_ks <- function(data, outcomes, nperm=100,
     outcomes.perm <- outcomes[idx.perm]
     names(outcomes.perm) <- sample.id
     
-    # calculate emd for permuted samples
+    # calculate ks for permuted samples
     perm.val <- BiocParallel::bplapply(data.df, calculate_ks_gene,
                                        rownames(data.df), outcomes.perm,
                                        BPPARAM = bpparam)
@@ -202,10 +214,9 @@ calculate_ks <- function(data, outcomes, nperm=100,
 #' @title Calculate KS score for a single gene
 #' @details All possible combinations of the classes are used as pairwise comparisons.
 #' The data in \code{vec} is divided based on class labels based on the \code{outcomes}
-#' identifiers given. For each pairwise computation, the \code{\link{hist}} function is
-#' used to generate histograms for the two groups. The densities are then retrieved
-#' and passed to  \code{\link{ks.test}} to compute the pairwise KS scores. The 
-#' total KS score for the given data is the sum of the pairwise KS scores.
+#' identifiers given. For each pairwise computation, \code{\link{ks.test}} is used to compute 
+#' the pairwise KS scores. The 
+#' total KS score for the given data is the average of the pairwise KS scores.
 #' 
 #' @param vec A named vector containing data (e.g. expression data) for a single
 #' gene.
@@ -224,9 +235,9 @@ calculate_ks <- function(data, outcomes, nperm=100,
 #' outcomes <- c(rep("A",50), rep("B",30), rep("C",20))
 #' names(outcomes) <- colnames(dat)
 #'
-#' calculate_emd_gene(dat[1,], outcomes, colnames(dat))
+#' calculate_ks_gene(dat[1,], outcomes, colnames(dat))
 #' 
-#' @seealso \code{\link[emdist]{emd2d}}
+#' @seealso \code{\link{ks.test}}
 calculate_ks_gene <- function(geneData, sample_names, outcomes) {
   
   names(geneData) <- sample_names
@@ -268,16 +279,19 @@ calculate_ks_gene <- function(geneData, sample_names, outcomes) {
 #' the following columns:
 #' \itemize{
 #' \item \code{ks} The calculated KS score.
-#' \item \code{q-value} The calculated q-value (by permutations).
+#' \item \code{q-value} The calculated q-value (by permutation analysis).
 #' }
 #' The row names should specify the gene identifiers for each row.
 #' @param ks.perm A matrix containing a row for each gene in \code{data}, and
 #' with a column containing KS scores for each random permutation calculated
 #' via \code{\link{calculate_ks}}.
-#' @param pairwise.ks.table A table containing the KS scores for each pairwise
+#' @param pairwise.ks.score A table containing the KS scores for each pairwise
 #' comparison for each gene. For a two-class problem, there should be only one column
 #' comparing class 1 and class 2. The row names should be gene identifiers. The column
 #' names should be in the format "<class 1> vs <class 2>" (e.g. "1 vs 2" or "A vs B").
+#' @param pairwise.ks.q A table of the same dimensions as \code{pairwise.ks.score} with
+#' the q-values for the pairwise comparisons. Q-values are computed by adjusting the p-value
+#' using the Benjamini-Hochberg method within each pairwise comparison.
 #' 
 #' @return The function combines its arguments in a list, which is assigned class
 #' 'KSomics'. The resulting object is returned.
@@ -317,15 +331,3 @@ KSomics <- function(data, outcomes, ks, ks.perm,
   
   KS.tab
 }
-
-# pairwise K-S for a single gene
-.ks_gene_pairwise <- function(vec, idxA, idxB) {
-  dataA <- vec[idxA]
-  dataB <- vec[idxB]
-  
-  dataA <- as.numeric(dataA)
-  dataB <- as.numeric(dataB)
-  
-  ks.test(dataA,dataB)
-}
-

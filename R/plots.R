@@ -45,8 +45,8 @@ plot_emdnull <- function(emdobj) {
 #' @export
 #' @title Plot null distribution of permuted ks scores vs. calculated ks
 #' scores.
-#' @description The median of the randomly permuted ks scores (i.e. the null
-#' distribution) is plotted on the x-axis, vs. the observed ks scores on the
+#' @description The median of the randomly permuted KS scores (i.e. the null
+#' distribution) is plotted on the x-axis, vs. the observed KS scores on the
 #' y-axis. The line \code{y=x} is superimposed.
 #' @param ksobj An \code{\link{KSomics}} object, typically returned via a call
 #' to \code{\link{calculate_ks}}.
