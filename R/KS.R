@@ -66,7 +66,7 @@ calculate_ks <- function(data, outcomes, nperm=100,
   
   # generate pairwise emd table for each gene
   if (verbose)
-    message("Calculating pairwise ks scores and p-values...", appendLF=FALSE)
+    message("Calculating pairwise KS scores and p-values...", appendLF=FALSE)
   
   # all possible pairwise comparisons
   classes <- unique(outcomes)
@@ -109,7 +109,7 @@ calculate_ks <- function(data, outcomes, nperm=100,
   
   ks <- as.matrix(ks)
   rownames(ks) <- colnames(data.df)
-  colnames(ks) <- 'KS'
+  colnames(ks) <- 'ks'
   
   if (verbose)
     message("done.")
@@ -124,7 +124,7 @@ calculate_ks <- function(data, outcomes, nperm=100,
   
   for (i in 1:nperm) {
     
-    msg <- paste("Calculating permuted ks #", i, " of ",
+    msg <- paste("Calculating permuted KS #", i, " of ",
                  nperm, "...", sep="")
     
     if (verbose)
