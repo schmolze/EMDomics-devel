@@ -17,8 +17,10 @@ Description: The EMDomics algorithm is used to perform a supervised
         needed to transform one distribution into the other, thus
         providing a metric of the overall difference in shape between
         two distributions. Permutation of sample labels is used to
-        generate q-values for the observed EMD scores.
-Version: 1.1.1
+        generate q-values for the observed EMD scores. This package also
+        incorporates the Komolgorov-Smirnov (K-S) test and generates q-values
+        using the same permutation technique.
+Version: 1.1.2
 biocViews: Software, DifferentialExpression, GeneExpression, Microarray
 Authors@R: c( person("Sadhika", "Malladi", email="sadhika.malladi@outlook.com", role=c("aut","cre")),
         person("Daniel", "Schmolze", email="emd@schmolze.com",
