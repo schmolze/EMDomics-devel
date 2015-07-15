@@ -3,6 +3,7 @@
 export(EMDomics)
 export(calculate_emd)
 export(calculate_emd_gene)
+export(calculate_ks)
 export(plot_density)
 export(plot_emdnull)
 export(plot_perms)
