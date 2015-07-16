@@ -47,7 +47,7 @@
 #' scores to be computed. Defaults to 100.
 #' @param pairwise.p Boolean specifying whether the user wants the pairwise p-values. Pairwise
 #' p-values returned by \code{\link{ks.test}} are adjusted within pairwise comparison using the
-#' Benjamini-Hochberg (BH) method.
+#' Benjamini-Hochberg (BH) method. Defaults to \code{FALSE}.
 #' @param verbose Boolean specifying whether to display progress messages.
 #' @param parallel Boolean specifying whether to use parallel processing via
 #' the \pkg{BiocParallel} package. Defaults to \code{TRUE}.
@@ -120,8 +120,7 @@ calculate_ks <- function(data, outcomes, nperm=100,
     message("done.")
   
   rownames(ks.stat) <- colnames(data.df)
-  stat.names <- paste("KS Test Statistic:",names)
-  colnames(ks.stat) <- stat.names
+  colnames(ks.stat) <- names
   
   # ------------------ aggregate ks score for each gene (mean) -----------------------
   if (verbose)
