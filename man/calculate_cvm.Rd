@@ -4,8 +4,8 @@
 \alias{calculate_cvm}
 \title{Earth Mover's Distance for differential analysis of genomics data}
 \usage{
-calculate_cvm(data, outcomes, nperm = 100, verbose = TRUE,
-  parallel = TRUE)
+calculate_cvm(data, outcomes, nperm = 100, pairwise.p = FALSE,
+  verbose = TRUE, parallel = TRUE)
 }
 \arguments{
 \item{data}{A matrix containing genomics data (e.g. gene expression levels).
@@ -18,6 +18,9 @@ in the \code{data} matrix. The names should be the sample identifiers provided i
 \item{nperm}{An integer specifying the number of randomly permuted CVM
 scores to be computed. Defaults to 100.}
 
+\item{pairwise.p}{Boolean specifying whether the permutation-based q-values should
+be computed for each pairwise comparison. Defaults to \code{FALSE}.}
+
 \item{verbose}{Boolean specifying whether to display progress messages.}
 
 \item{parallel}{Boolean specifying whether to use parallel processing via
@@ -25,25 +28,12 @@ the \pkg{BiocParallel} package. Defaults to \code{TRUE}.}
 }
 \value{
 The function returns an \code{\link{CVMomics}} object.
-examples
-# 100 genes, 100 samples
-dat <- matrix(rnorm(10000), nrow=100, ncol=100)
-rownames(dat) <- paste("gene", 1:100, sep="")
-colnames(dat) <- paste("sample", 1:100, sep="")
-
-# "A": first 50 samples; "B": next 30 samples; "C": final 20 samples
-outcomes <- c(rep("A",50), rep("B",30), rep("C",20))
-names(outcomes) <- colnames(dat)
-
-results <- calculate_cvm(dat, outcomes, nperm=10, parallel=FALSE)
-head(results$cvm)
 }
 \description{
 This is the main user interface to the \pkg{EMDomics} package, and
-will usually the only function needed when conducting an analysis using the Cramer von Mises
+will usually the only function needed when conducting an analysis using the CVM
 algorithm. Analyses can also be conducted with the Komolgorov-Smirnov Test using
-\code{calculate_ks} or with the Earth Mover's Distance (EMD) algorithm using
-\code{calculate_emd}.
+\code{calculate_ks} or the Cramer Von Mises algorithm using \code{calculate_cvm}.
 
 The algorithm is used to compare genomics data between any number of groups.
 Usually the data will be gene expression
@@ -73,9 +63,22 @@ the null distribution, and the False Discovery Rate (FDR) is computed for
 a range of permissive to restrictive significance thresholds. The threshold
 that minimizes the FDR is defined as the q-value, and is used to interpret
 the significance of the CVM score analogously to a p-value (e.g. q-value
-< 0.05 = significant.)
+< 0.05 is significant.)
+}
+\examples{
+# 100 genes, 100 samples
+dat <- matrix(rnorm(10000), nrow=100, ncol=100)
+rownames(dat) <- paste("gene", 1:100, sep="")
+colnames(dat) <- paste("sample", 1:100, sep="")
+
+# "A": first 50 samples; "B": next 30 samples; "C": final 20 samples
+outcomes <- c(rep("A",50), rep("B",30), rep("C",20))
+names(outcomes) <- colnames(dat)
+
+results <- calculate_cvm(dat, outcomes, nperm=10, parallel=FALSE)
+head(results$cvm)
 }
 \seealso{
-\code{\link{EMDomics}} \code{\link[CDFt]{CramerVonMisesTwoSamples}}
+\code{\link{CVMomics}} \code{\link[CDFt]{CramerVonMisesTwoSamples}}
 }
 

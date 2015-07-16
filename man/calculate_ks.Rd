@@ -4,7 +4,8 @@
 \alias{calculate_ks}
 \title{Calculate the Komolgorov-Smirnov test statistic and q-values.}
 \usage{
-calculate_ks(data, outcomes, nperm = 100, verbose = TRUE, parallel = TRUE)
+calculate_ks(data, outcomes, nperm = 100, verbose = TRUE,
+  pairwise.p = FALSE, parallel = TRUE)
 }
 \arguments{
 \item{data}{A matrix containing genomics data (e.g. gene expression levels).
@@ -18,6 +19,10 @@ in the \code{data} matrix. The names should be the sample identifiers provided i
 scores to be computed. Defaults to 100.}
 
 \item{verbose}{Boolean specifying whether to display progress messages.}
+
+\item{pairwise.p}{Boolean specifying whether the user wants the pairwise p-values. Pairwise
+p-values returned by \code{\link{ks.test}} are adjusted within pairwise comparison using the
+Benjamini-Hochberg (BH) method. Defaults to \code{FALSE}.}
 
 \item{parallel}{Boolean specifying whether to use parallel processing via
 the \pkg{BiocParallel} package. Defaults to \code{TRUE}.}
@@ -50,8 +55,9 @@ differences).
 The KS algorithm implemented in \pkg{EMDomics} has two main steps.
 First, a matrix (e.g. of expression data) is divided into data for each of the groups.
 Every possible pairwise KS score is then computed and stored in a table. The KS score
-for a single gene is calculated by averaging all of the pairwise KS scores. The p-values
-from the KS test are adjusted using the Benjamini-Hochberg method.
+for a single gene is calculated by averaging all of the pairwise KS scores. If the user
+sets \code{pairwise.p} to true, then the p-values
+from the KS test are adjusted using the Benjamini-Hochberg method and stored in a table.
 Next, the labels for each of the groups are randomly
 permuted a specified number of times, and an EMD score for each permutation is
 calculated. The median of the permuted scores for each gene is used as

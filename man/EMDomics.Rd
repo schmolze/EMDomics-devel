@@ -4,7 +4,7 @@
 \alias{EMDomics}
 \title{Create an EMDomics object}
 \usage{
-EMDomics(data, outcomes, emd, emd.perm, pairwise.emd.table)
+EMDomics(data, outcomes, emd, emd.perm, pairwise.emd.table, pairwise.q.table)
 }
 \arguments{
 \item{data}{A matrix containing genomics data (e.g. gene expression levels).

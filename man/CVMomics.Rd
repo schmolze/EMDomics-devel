@@ -4,7 +4,7 @@
 \alias{CVMomics}
 \title{Create an CVMomics object}
 \usage{
-CVMomics(data, outcomes, cvm, cvm.perm, pairwise.cvm.table)
+CVMomics(data, outcomes, cvm, cvm.perm, pairwise.cvm.table, pairwise.q.table)
 }
 \arguments{
 \item{data}{A matrix containing genomics data (e.g. gene expression levels).
@@ -17,13 +17,13 @@ names of this vector must correspond to the column names of \code{data}.}
 \item{cvm}{A matrix containing a row for each gene in \code{data}, and with
 the following columns:
 \itemize{
-\item \code{cvm} The calculated CVM score.
+\item \code{cvm} The calculated cvm score.
 \item \code{q-value} The calculated q-value.
 }
 The row names should specify the gene identifiers for each row.}
 
 \item{cvm.perm}{A matrix containing a row for each gene in \code{data}, and
-with a column containing CVM scores for each random permutation calculated
+with a column containing cvm scores for each random permutation calculated
 via \code{\link{calculate_cvm}}.}
 
 \item{pairwise.cvm.table}{A table containing the CVM scores for each pairwise

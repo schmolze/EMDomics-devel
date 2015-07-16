@@ -5,6 +5,8 @@
 \alias{emdomics-package}
 \title{Earth Mover's Distance algorithm for differential analysis of genomics data.}
 \description{
-\code{\link{calculate_emd}} will usually be the only function needed.
+\code{\link{calculate_emd}}, \code{\link{calculate_cvm}}, or \code{\link{calculate_ks}}
+will usually be the only function needed, depending on the type of distribution comparison
+test that is requested.
 }
 

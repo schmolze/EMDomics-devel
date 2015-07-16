@@ -4,8 +4,8 @@
 \alias{calculate_emd}
 \title{Earth Mover's Distance for differential analysis of genomics data}
 \usage{
-calculate_emd(data, outcomes, binSize = 0.2, nperm = 100, verbose = TRUE,
-  parallel = TRUE)
+calculate_emd(data, outcomes, binSize = 0.2, nperm = 100,
+  pairwise.p = FALSE, verbose = TRUE, parallel = TRUE)
 }
 \arguments{
 \item{data}{A matrix containing genomics data (e.g. gene expression levels).
@@ -20,6 +20,9 @@ the data for each group. Defaults to 0.2.}
 
 \item{nperm}{An integer specifying the number of randomly permuted EMD
 scores to be computed. Defaults to 100.}
+
+\item{pairwise.p}{Boolean specifying whether the permutation-based q-values should
+be computed for each pairwise comparison. Defaults to \code{FALSE}.}
 
 \item{verbose}{Boolean specifying whether to display progress messages.}
 

@@ -16,7 +16,7 @@ to the names of \code{vec}.}
 \item{sample_names}{A character vector with the names of the samples in \code{vec}.}
 }
 \value{
-The CVM score is returned.
+The cvm score is returned.
 }
 \description{
 Calculate CVM score for a single gene

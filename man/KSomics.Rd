@@ -4,7 +4,7 @@
 \alias{KSomics}
 \title{Create an KSomics object}
 \usage{
-KSomics(data, outcomes, ks, ks.perm, pairwise.ks.score, pairwise.ks.q)
+KSomics(data, outcomes, ks, ks.perm, pairwise.ks.score, pairwise.ks.q = NULL)
 }
 \arguments{
 \item{data}{A matrix containing genomics data (e.g. gene expression levels).
