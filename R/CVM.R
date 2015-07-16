@@ -1,20 +1,3 @@
-#' Earth Mover's Distance algorithm for differential analysis of genomics data.
-#'
-#' \code{\link{calculate_cvm}}, \code{\link{calculate_cvm}}, or \code{\link{calculate_ks}} 
-#' will usually be the only function needed, depending on the type of distribution comparison
-#' test that is requested.
-#'
-#'
-#' @import CDFt
-#' @import BiocParallel
-#' @import matrixStats
-#' @import ggplot2
-#' @import CDFt
-#' @name cvmomics-package
-#' @docType package
-NULL
-
-
 #' @export
 #' @title Earth Mover's Distance for differential analysis of genomics data
 #' @description This is the main user interface to the \pkg{EMDomics} package, and
