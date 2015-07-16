@@ -1,6 +1,8 @@
 #' Earth Mover's Distance algorithm for differential analysis of genomics data.
 #'
-#' \code{\link{calculate_emd}} will usually be the only function needed.
+#' \code{\link{calculate_emd}}, \code{\link{calculate_cvm}}, or \code{\link{calculate_ks}} 
+#' will usually be the only function needed, depending on the type of distribution comparison
+#' test that is requested.
 #'
 #'
 #' @import emdist
@@ -59,6 +61,8 @@ NULL
 #' the data for each group. Defaults to 0.2.
 #' @param nperm An integer specifying the number of randomly permuted EMD
 #' scores to be computed. Defaults to 100.
+#' @param pairwise.p Boolean specifying whether the permutation-based q-values should
+#' be computed for each pairwise comparison. Defaults to \code{FALSE}.
 #' @param verbose Boolean specifying whether to display progress messages.
 #' @param parallel Boolean specifying whether to use parallel processing via
 #' the \pkg{BiocParallel} package. Defaults to \code{TRUE}.
@@ -78,7 +82,8 @@ NULL
 #' 
 #' @seealso \code{\link{EMDomics}} \code{\link[emdist]{emd2d}}
 calculate_emd <- function(data, outcomes, binSize=0.2,
-                            nperm=100, verbose=TRUE, parallel=TRUE) {
+                          nperm=100, pairwise.p=FALSE, verbose=TRUE, 
+                          parallel=TRUE) {
 
   bpparam <- BiocParallel::bpparam()
 
@@ -105,7 +110,7 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
                                            binSize, verbose,
                                            BPPARAM = bpparam)
   
-  # Remove genes that were not binned properly by the histogram
+  # Remove genes that were not binned properly by the histogram function
   lengths <- lapply(emd.tab, function(x){length(x)})
   remove.genes <- lengths < ncol(pairs)
   bad.lengths <- lengths[remove.genes]
@@ -136,6 +141,13 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
 
   if (verbose)
     message("done.")
+  
+  # pairwise q-value computation if specified
+  if (pairwise.p) {
+    emd.pairwise.q <- .emd_pairwise_q(data.df, emd, outcomes, nperm, verbose, binSize, bpparam)
+  } else {
+    emd.pairwise.q <- NULL
+  }
 
   # --------------- permuted emd scores ----------------
 
@@ -221,7 +233,7 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
 
   emd <- cbind(emd, emd.qval)
 
-  EMDomics(data, outcomes, emd, emd.perm, emd.tab)
+  EMDomics(data, outcomes, emd, emd.perm, emd.tab, emd.pairwise.q)
 
 }
 
@@ -314,12 +326,111 @@ calculate_emd_gene <- function(vec, outcomes, sample_names, binSize=0.2) {
 #' 'EMDomics'. The resulting object is returned.
 #' 
 #' @seealso \code{\link{calculate_emd}}
-EMDomics <- function(data, outcomes, emd, emd.perm, pairwise.emd.table) {
+EMDomics <- function(data, outcomes, emd, emd.perm, pairwise.emd.table, pairwise.q.table) {
 
   structure(list("data"=data, "outcomes"=outcomes,
-                 "emd"=emd, "emd.perm"=emd.perm, "pairwise.emd.table"=pairwise.emd.table),
+                 "emd"=emd, "emd.perm"=emd.perm, "pairwise.emd.table"=pairwise.emd.table,
+                 "pairwise.q.table"=pairwise.q.table),
             class = "EMDomics")
 
+}
+
+# Creates a table of all the pairwise q-values for all genes
+.emd_pairwise_q <- function(data.df, emd, outcomes, nperm, verbose, binSize, bpparam) {
+  
+  classes <- unique(outcomes)
+  pairs <- combn(classes,2)
+  names <- apply(pairs,2,function(x){paste(x[1],'vs',x[2])})
+  
+  q.tab <- matrix(NA, nrow=ncol(data.df), ncol=ncol(pairs))
+  colnames(q.tab) <- names
+  rownames(q.tab) <- colnames(data.df)
+  
+  for (p in 1:ncol(pairs)) {
+    
+    # ------------------ calculate permuted emd scores ---------------------
+    sample_count <- length(outcomes)
+    
+    # matrix to hold permuted emd values
+    emd.perm <- matrix(nrow=ncol(data.df), ncol=nperm)
+    rownames(emd.perm) <- colnames(data.df)
+    colnames(emd.perm) <- as.character(1:nperm)
+    
+    msg <- paste("Beginning pairwise q-value computatiion for",names[p])
+    if (verbose)
+      message(msg)
+    
+    for (i in 1:nperm) {
+      
+      msg <- paste("Calculating permuted emd #", i, " of ",
+                   nperm, "...", sep="")
+      
+      if (verbose)
+        message(msg, appendLF=FALSE)
+      
+      # permute samples
+      idx.perm <- sample(1:sample_count, replace=FALSE)
+      sample.id <- names(outcomes)
+      outcomes.perm <- outcomes[idx.perm]
+      names(outcomes.perm) <- sample.id
+      
+      # calculate emd for permuted samples
+      perm.val <- BiocParallel::bplapply(data.df, calculate_emd_gene,
+                                         outcomes.perm, rownames(data.df),
+                                         binSize,
+                                         BPPARAM = bpparam)
+      
+      emd.perm[,i] <- unlist(sapply(perm.val,"[",1))
+      
+      if (verbose)
+        message("done.")
+    }
+    
+    # ------------------ q-values --------------------
+    
+    if (verbose)
+      message("Calculating pairwise q-values...", appendLF=FALSE)
+    
+    perm.medians <- apply(emd.perm,1,function(x){median(x)})
+    
+    # generate thresholds and qval matrix
+    thr_upper <- ceiling(max(emd))
+    thr <- seq(thr_upper, 0, by = -0.001)
+    qvals <- matrix(1, nrow=nrow(emd), ncol=length(thr))
+    
+    colnames(qvals) <- thr
+    rownames(qvals) <- rownames(emd)
+    
+    # calculate fdr at each threshold
+    j <- 0
+    for (d in thr) {
+      
+      j <- j+1
+      
+      # calculate true discoveries at this threshold
+      idx <- which(emd > d)
+      n.signif <- length(idx)
+      genes.signif <- rownames(emd)[idx]
+      
+      # calculate false discoveries at this threshold
+      idx <- which(perm.medians > d)
+      n.fd <- length(idx)
+      
+      fdr <- n.fd/n.signif
+      qvals[genes.signif, j] <- fdr
+      
+    }
+    
+    # final q-value = smallest fdr
+    emd.qval <- apply(qvals, 1, min)
+    
+    q.tab[,p] <- emd.qval
+    
+    if (verbose)
+      message("done.")
+  }
+  
+  q.tab
 }
 
 # Creates a table of all the pairwise EMD scores for one gene
