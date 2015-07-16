@@ -89,6 +89,18 @@ calculate_ks <- function(data, outcomes, nperm=100,
   if (parallel == FALSE)
     bpparam <- BiocParallel::SerialParam()
   
+  
+  if (seq)
+  {
+    data<-data*1E6
+    data<-log2(data+1)
+  }
+  
+  if (quantile.norm)
+  {
+    preprocessCore::normalize.quantiles(data)
+  }
+  
   # transpose and coerce to df (for bplapply)
   data.df <- as.data.frame(t(data))
   sample_names <- rownames(data.df)
