@@ -87,6 +87,50 @@ plot_ksnull <- function(ksobj) {
 }
 
 #' @export
+#' @title Plot null distribution of permuted cvm scores vs. calculated cvm
+#' scores.
+#' @description The median of the randomly permuted CVM scores (i.e. the null
+#' distribution) is plotted on the x-axis, vs. the observed CVM scores on the
+#' y-axis. The line \code{y=x} is superimposed.
+#' @param cvmobj An \code{\link{CVMomics}} object, typically returned via a call
+#' to \code{\link{calculate_cvm}}.
+#' @return A \code{\link[ggplot2]{ggplot}} object is returned. If the value is
+#' not assigned, a plot will be drawn.
+#' @examples
+#' # 100 genes, 100 samples
+#' dat <- matrix(rnorm(10000), nrow=100, ncol=100)
+#' rownames(dat) <- paste("gene", 1:100, sep="")
+#' colnames(dat) <- paste("sample", 1:100, sep="")
+#'
+#' # "group A" = first 50, "group B" = second 50
+#' groups <- c(rep("A",50),rep("B",50))
+#' names(groups) <- colnames(dat)
+#'
+#' results <- calculate_cvm(dat, groups, nperm=10, parallel=FALSE)
+#' plot_cvmnull(results)
+#' @seealso \code{\link{calculate_cvm}} \code{\link[ggplot2]{ggplot}}
+plot_cvmnull <- function(cvmobj) {
+  
+  cvm <- cvmobj$cvm
+  cvm.perm <- cvmobj$cvm.perm
+  rms <- rowMedians(cvm.perm)
+  
+  data <- as.data.frame(cbind(cvm[,"cvm",drop=FALSE], rms))
+  
+  title <- "Null distribution vs. observed CVM scores"
+  
+  ggplot(data, aes(rms, cvm)) + geom_point(alpha=0.3) +
+    geom_segment(x=0, y=0, xend=10, yend=10, colour="red") +
+    xlab("median of permuted cvm scores")  +
+    ylab("observed cvm scores") +
+    ggtitle(title) +
+    theme(axis.text=element_text(size=20),
+          axis.title=element_text(size=24),
+          plot.title =element_text(size=24))
+  
+}
+
+#' @export
 #' @title Plot histogram of EMD scores calculated via random permutation.
 #' @description The permuted EMD scores stored in \code{emdobj$emd.perm} are
 #' plotted as a histogram.
@@ -160,6 +204,46 @@ plot_ksperms <- function(ksobj) {
   
   ggplot(ks.perm, aes(x)) + geom_histogram(alpha=0.7) +
     xlab("ks score")  + ggtitle(title) +
+    theme(axis.text=element_text(size=20),
+          axis.title=element_text(size=24),
+          plot.title =element_text(size=24))
+  
+}
+
+#' @export
+#' @title Plot histogram of CVM scores calculated via random permutation.
+#' @description The permuted CVM scores stored in \code{cvmobj$cvm.perm} are
+#' plotted as a histogram.
+#' @param cvmobj An \code{\link{CVMomics}} object, typically returned via a call
+#' to \code{\link{calculate_cvm}}.
+#' @return A \code{\link[ggplot2]{ggplot}} object is returned. If the value is
+#' not assigned, a plot will be drawn.
+#' @examples
+#' # 100 genes, 100 samples
+#' dat <- matrix(rnorm(10000), nrow=100, ncol=100)
+#' rownames(dat) <- paste("gene", 1:100, sep="")
+#' colnames(dat) <- paste("sample", 1:100, sep="")
+#'
+#' # "A": first 50 samples; "B": next 30 samples; "C": final 20 samples
+#' outcomes <- c(rep("A",50), rep("B",30), rep("C",20))
+#' names(outcomes) <- colnames(dat)
+#' 
+#' results <- calculate_cvm(dat, outcomes, nperm=10, parallel=FALSE)
+#' plot_perms(results)
+#' @seealso \code{\link{calculate_cvm}} \code{\link[ggplot2]{ggplot}}
+plot_cvmperms <- function(cvmobj) {
+  
+  cvm.perm <- as.data.frame(cvmobj$cvm.perm)
+  
+  # to appease CRAN
+  x <- NULL
+  
+  colnames(cvm.perm) <- "x"
+  
+  title <- "Histogram of permuted CVM scores"
+  
+  ggplot(cvm.perm, aes(x)) + geom_histogram(alpha=0.7) +
+    xlab("cvm score")  + ggtitle(title) +
     theme(axis.text=element_text(size=20),
           axis.title=element_text(size=24),
           plot.title =element_text(size=24))
@@ -265,6 +349,60 @@ plot_ks_density <- function(ksobj, gene_name) {
   
   title <- paste(gene_name, "\n", "(ks score = ",
                  round(ks_score, 2), ")", sep="")
+  
+  ggplot(df, aes(exp, fill=group)) + geom_density(alpha=0.5) +
+    xlab("data")  + ggtitle(title) +
+    theme(axis.text=element_text(size=20),
+          axis.title=element_text(size=24),
+          plot.title =element_text(size=24),
+          legend.text = element_text(size = 24),
+          legend.title = element_text(size=24))
+}
+
+#' @export
+#' @title Plot distributions and CVM score for a gene.
+#' @description The data for the specified gene is retrieved from
+#' \code{cvmobj$data}. \code{outcomes} is used to divide the data into 
+#' distributions for each group, which are then visualized as
+#' density distributions. The calculated CVM score for the specified gene is
+#' displayed in the plot title.
+#' @param cvmobj An \code{\link{CVMomics}} object, typically returned via a call
+#' to \code{\link{calculate_cvm}}.
+#' @param gene_name The gene to visualize. The name should be defined as a row
+#' name in \code{cvmobj$cvm}.
+#' @return A \code{\link[ggplot2]{ggplot}} object is returned. If the value is
+#' not assigned, a plot will be drawn.
+#' @examples
+#' # 100 genes, 100 samples
+#' dat <- matrix(rnorm(10000), nrow=100, ncol=100)
+#' rownames(dat) <- paste("gene", 1:100, sep="")
+#' colnames(dat) <- paste("sample", 1:100, sep="")
+#'
+#' # "A": first 50 samples; "B": next 30 samples; "C": final 20 samples
+#' outcomes <- c(rep("A",50), rep("B",30), rep("C",20))
+#' names(outcomes) <- colnames(dat)
+#' 
+#' results <- calculate_cvm(dat, outcomes, nperm=10, parallel=FALSE)
+#' plot_density(results, "gene5")
+#' 
+#' @seealso \code{\link{calculate_cvm}} \code{\link[ggplot2]{ggplot}}
+plot_cvm_density <- function(cvmobj, gene_name) {
+  
+  data <- cvmobj$data
+  outcomes <- cvmobj$outcomes
+  classes <- unique(outcomes)
+  
+  cvm_score <- cvmobj$cvm[gene_name, "cvm"]
+  gene.data <- data[gene_name,]
+  
+  # to appease CRAN
+  group <- NULL
+  exp <- NULL
+  
+  df<-data.frame(row.names=colnames(data), group=outcomes, exp=gene.data)
+  
+  title <- paste(gene_name, "\n", "(cvm score = ",
+                 round(cvm_score, 2), ")", sep="")
   
   ggplot(df, aes(exp, fill=group)) + geom_density(alpha=0.5) +
     xlab("data")  + ggtitle(title) +

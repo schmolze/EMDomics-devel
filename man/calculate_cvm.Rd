@@ -22,9 +22,6 @@ scores to be computed. Defaults to 100.}
 
 \item{parallel}{Boolean specifying whether to use parallel processing via
 the \pkg{BiocParallel} package. Defaults to \code{TRUE}.}
-
-\item{binSize}{The bin size to be used when generating histograms of
-the data for each group. Defaults to 0.2.}
 }
 \value{
 The function returns an \code{\link{CVMomics}} object.
@@ -43,9 +40,10 @@ head(results$cvm)
 }
 \description{
 This is the main user interface to the \pkg{EMDomics} package, and
-will usually the only function needed when conducting an analysis using the CVM
+will usually the only function needed when conducting an analysis using the Cramer von Mises
 algorithm. Analyses can also be conducted with the Komolgorov-Smirnov Test using
-\code{calculate_ks}.
+\code{calculate_ks} or with the Earth Mover's Distance (EMD) algorithm using
+\code{calculate_emd}.
 
 The algorithm is used to compare genomics data between any number of groups.
 Usually the data will be gene expression

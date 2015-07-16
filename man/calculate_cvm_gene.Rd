@@ -26,7 +26,7 @@ All possible combinations of the classes are used as pairwise comparisons.
 The data in \code{vec} is divided based on class labels based on the \code{outcomes}
 identifiers given. For each pairwise computation, the \code{\link{hist}} function is
 used to generate histograms for the two groups. The densities are then retrieved
-and passed to  \code{\link[cvmist]{cvm2d}} to compute the pairwise CVM score. The
+and passed to  \code{\link[CDFt]{CramerVonMisesTwoSamples}} to compute the pairwise CVM score. The
 total CVM score for the given data is the average of the pairwise CVM scores.
 }
 \examples{

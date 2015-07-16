@@ -1,9 +1,10 @@
 #' @export
 #' @title Earth Mover's Distance for differential analysis of genomics data
 #' @description This is the main user interface to the \pkg{EMDomics} package, and
-#' will usually the only function needed when conducting an analysis using the CVM
+#' will usually the only function needed when conducting an analysis using the Cramer von Mises
 #' algorithm. Analyses can also be conducted with the Komolgorov-Smirnov Test using
-#' \code{calculate_ks}.
+#' \code{calculate_ks} or with the Earth Mover's Distance (EMD) algorithm using 
+#' \code{calculate_emd}.
 #'
 #' The algorithm is used to compare genomics data between any number of groups. 
 #' Usually the data will be gene expression

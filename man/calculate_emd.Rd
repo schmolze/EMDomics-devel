@@ -33,7 +33,7 @@ The function returns an \code{\link{EMDomics}} object.
 This is the main user interface to the \pkg{EMDomics} package, and
 will usually the only function needed when conducting an analysis using the EMD
 algorithm. Analyses can also be conducted with the Komolgorov-Smirnov Test using
-\code{calculate_ks}.
+\code{calculate_ks} or the Cramer Von Mises algorithm using \code{calculate_cvm}.
 
 The algorithm is used to compare genomics data between any number of groups.
 Usually the data will be gene expression
@@ -63,7 +63,7 @@ the null distribution, and the False Discovery Rate (FDR) is computed for
 a range of permissive to restrictive significance thresholds. The threshold
 that minimizes the FDR is defined as the q-value, and is used to interpret
 the significance of the EMD score analogously to a p-value (e.g. q-value
-< 0.05 = significant.)
+< 0.05 is significant.)
 }
 \examples{
 # 100 genes, 100 samples
