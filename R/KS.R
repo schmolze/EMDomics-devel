@@ -25,8 +25,9 @@
 #' The KS algorithm implemented in \pkg{EMDomics} has two main steps.
 #' First, a matrix (e.g. of expression data) is divided into data for each of the groups.
 #' Every possible pairwise KS score is then computed and stored in a table. The KS score
-#' for a single gene is calculated by averaging all of the pairwise KS scores. The p-values
-#' from the KS test are adjusted using the Benjamini-Hochberg method.
+#' for a single gene is calculated by averaging all of the pairwise KS scores. If the user
+#' sets \code{pairwise.p} to true, then the p-values
+#' from the KS test are adjusted using the Benjamini-Hochberg method and stored in a table.
 #' Next, the labels for each of the groups are randomly
 #' permuted a specified number of times, and an EMD score for each permutation is
 #' calculated. The median of the permuted scores for each gene is used as
@@ -44,6 +45,9 @@
 #' in the \code{data} matrix. The names should be the sample identifiers provided in \code{data}.
 #' @param nperm An integer specifying the number of randomly permuted EMD
 #' scores to be computed. Defaults to 100.
+#' @param pairwise.p Boolean specifying whether the user wants the pairwise p-values. Pairwise
+#' p-values returned by \code{\link{ks.test}} are adjusted within pairwise comparison using the
+#' Benjamini-Hochberg (BH) method.
 #' @param verbose Boolean specifying whether to display progress messages.
 #' @param parallel Boolean specifying whether to use parallel processing via
 #' the \pkg{BiocParallel} package. Defaults to \code{TRUE}.
@@ -64,7 +68,8 @@
 #' 
 #' @seealso \code{\link{EMDomics}} \code{\link{ks.test}}
 calculate_ks <- function(data, outcomes, nperm=100, 
-                         verbose=TRUE, parallel=TRUE) {
+                         verbose=TRUE, pairwise.p=FALSE, 
+                         parallel=TRUE) {
   bpparam <- BiocParallel::bpparam()
   
   if (parallel == FALSE)
@@ -78,7 +83,7 @@ calculate_ks <- function(data, outcomes, nperm=100,
   
   # generate pairwise ks table for each gene
   if (verbose)
-    message("Calculating pairwise KS scores and p-values...", appendLF=FALSE)
+    message("Calculating pairwise KS scores...", appendLF=FALSE)
   
   # all possible pairwise comparisons
   classes <- unique(outcomes)
@@ -86,34 +91,39 @@ calculate_ks <- function(data, outcomes, nperm=100,
   names <- apply(pairs,2,function(x){paste(x[1],'vs',x[2])})
   
   ks.tab <- BiocParallel::bplapply(data.df, .ks_pairwise_table, sample_names, 
-                                    outcomes, pairs, verbose,
+                                    outcomes, pairs, pairwise.p, verbose,
                                     BPPARAM = bpparam)
   
-  # first column has p-value
-  # second column has test statistics
-  # alternating pattern
-  ks.tab <- matrix(unlist(ks.tab), nrow=ncol(data.df), ncol=ncol(pairs)*2, byrow=TRUE)
+  if (pairwise.p) {
+    ks.tab <- matrix(unlist(ks.tab), nrow=ncol(data.df), ncol=ncol(pairs)*2, byrow=TRUE)
   
-  ks.p <- ks.tab[,seq(1,ncol(pairs)*2,2)]
-  ks.stat <- ks.tab[,seq(2,ncol(pairs)*2,2)]
+    ks.p <- ks.tab[,seq(1,ncol(pairs)*2,2)]
+    ks.stat <- ks.tab[,seq(2,ncol(pairs)*2,2)]
+    
+    # adjust p-values using BH/FDR by each pairwise comparison
+    if (verbose)
+      message("Adjusting p-values with B-H method by pairwise comparison...", appendLF=FALSE)
+    
+    ks.p <- apply(ks.p,2,function(x){ p.adjust(x, method='fdr') })
+    rownames(ks.p) <- colnames(data.df)
+    colnames(ks.p) <- names
+    
+    if (verbose)
+      message("done.")
+  } else {
+    ks.tab <- matrix(unlist(ks.tab), nrow=ncol(data.df), ncol=ncol(pairs), byrow=TRUE)
+    ks.stat <- ks.tab
+    ks.p <- NULL
+  }
   
   if (verbose)
     message("done.")
   
-  # adjust p-values using BH/FDR by each pairwise comparison
-  if (verbose)
-    message("Adjusting p-values with B-H method by pairwise comparison...", appendLF=FALSE)
-  ks.p <- apply(ks.p,2,function(x){ p.adjust(x, method='fdr') })
-  if (verbose)
-    message("done.")
-  
-  rownames(ks.p) <- colnames(data.df)
   rownames(ks.stat) <- colnames(data.df)
-  colnames(ks.p) <- names
   stat.names <- paste("KS Test Statistic:",names)
   colnames(ks.stat) <- stat.names
   
-  # ------------------ aggregate ks for each gene (mean) -----------------------
+  # ------------------ aggregate ks score for each gene (mean) -----------------------
   if (verbose)
     message("Calculating KS...", appendLF=FALSE)
   
@@ -205,7 +215,6 @@ calculate_ks <- function(data, outcomes, nperm=100,
     message("done.")
   
   ks <- cbind(ks, ks.qval)
-  pairwise.tab <- cbind(ks.p,ks.stat)
   
   KSomics(data, outcomes, ks, ks.perm, ks.stat, ks.p)
 }
@@ -298,7 +307,7 @@ calculate_ks_gene <- function(geneData, sample_names, outcomes) {
 #' 
 #' @seealso \code{\link{calculate_ks}}
 KSomics <- function(data, outcomes, ks, ks.perm, 
-                        pairwise.ks.score, pairwise.ks.q) {
+                        pairwise.ks.score, pairwise.ks.q=NULL) {
   structure(list("data"=data, "outcomes"=outcomes,
                  "ks"=ks, "ks.perm"=ks.perm, "pairwise.ks.score"=pairwise.ks.score, 
                  "pairwise.ks.q"=pairwise.ks.q),
@@ -307,11 +316,15 @@ KSomics <- function(data, outcomes, ks, ks.perm,
 
 # table of pairwise K-S results
 .ks_pairwise_table <- function(geneData, sample_names, outcomes, 
-                               pairs, verbose) {
+                               pairs, pairwise.p, verbose) {
   names(geneData) <- sample_names
   
-  KS.tab <- matrix(NA, nrow=1, ncol=ncol(pairs)*2)
-
+  if (pairwise.p) {
+    KS.tab <- matrix(NA, nrow=1, ncol=ncol(pairs)*2)
+  } else {
+    KS.tab <- matrix(NA, nrow=1, ncol=ncol(pairs))
+  }
+  
   for (p in 1:ncol(pairs))
   {
     inds <- pairs[,p]
@@ -323,8 +336,13 @@ KSomics <- function(data, outcomes, ks, ks.perm,
     sink.lab <- names(outcomes[outcomes==sink])
     
     KS <- ks.test(geneData[src.lab],geneData[sink.lab])
-    KS.tab[1,p] <- KS$p.value
-    KS.tab[1,ncol(pairs)+p] <- unname(KS$statistic)
+    
+    if (pairwise.p) {
+      KS.tab[1,p] <- KS$p.value
+      KS.tab[1,ncol(pairs)+p] <- unname(KS$statistic)
+    } else {
+      KS.tab[1,p] <- KS$statistic
+    }
   }
   
   KS.tab <- as.numeric(KS.tab)
