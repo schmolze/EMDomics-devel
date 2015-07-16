@@ -29,7 +29,7 @@ Authors@R: c( person("Sadhika", "Malladi", email="sadhika.malladi@outlook.com", 
         "Nabavi", email="sheida_nabavi@hms.harvard.edu", role="aut"))
 Maintainer: Sadhika Malladi <emd.malladi@schmolze.com> and Daniel Schmolze <emd@schmolze.com>
 Depends: R (>= 3.2.1)
-Imports: emdist, BiocParallel, matrixStats, ggplot2, CDFt
+Imports: emdist, BiocParallel, matrixStats, ggplot2, CDFt, preprocessCore
 Suggests: knitr
 License: MIT + file LICENSE
 LazyData: true

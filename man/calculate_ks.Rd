@@ -4,8 +4,8 @@
 \alias{calculate_ks}
 \title{Calculate the Komolgorov-Smirnov test statistic and q-values.}
 \usage{
-calculate_ks(data, outcomes, nperm = 100, verbose = TRUE,
-  pairwise.p = FALSE, parallel = TRUE)
+calculate_ks(data, outcomes, nperm = 100, pairwise.p = FALSE, seq = FALSE,
+  quantile.norm = FALSE, verbose = TRUE, parallel = TRUE)
 }
 \arguments{
 \item{data}{A matrix containing genomics data (e.g. gene expression levels).
@@ -18,14 +18,29 @@ in the \code{data} matrix. The names should be the sample identifiers provided i
 \item{nperm}{An integer specifying the number of randomly permuted EMD
 scores to be computed. Defaults to 100.}
 
-\item{verbose}{Boolean specifying whether to display progress messages.}
-
 \item{pairwise.p}{Boolean specifying whether the user wants the pairwise p-values. Pairwise
 p-values returned by \code{\link{ks.test}} are adjusted within pairwise comparison using the
 Benjamini-Hochberg (BH) method. Defaults to \code{FALSE}.}
 
+\item{seq}{Boolean specifying if the given data is RNA Sequencing data and ought to be
+normalized. Set to \code{TRUE}, if passing transcripts per million (TPM) data or raw
+data that is not scaled. If \code{TRUE}, data will be normalized by first multiplying by 1E6, then adding
+1, then taking the log base 2. If \code{FALSE}, the data will be handled as is (unless
+\code{quantile.norm} is \code{TRUE}). Note that as a distribution comparison function, K-S will
+compute faster with scaled data. Defaults to \code{FALSE}.}
+
+\item{quantile.norm}{Boolean specifying is data should be normalized by quantiles. If
+\code{TRUE}, then the \code{\link[preprocessCore]{normalize.quantiles}} function is used.
+Defaults to \code{FALSE}.}
+
+\item{verbose}{Boolean specifying whether to display progress messages.}
+
 \item{parallel}{Boolean specifying whether to use parallel processing via
 the \pkg{BiocParallel} package. Defaults to \code{TRUE}.}
+
+\item{quantile.norm}{Boolean specifying is data should be normalized by quantiles. If
+\code{TRUE}, then the \code{\link[preprocessCore]{normalize.quantiles}} function is used.
+Defaults to \code{FALSE}.}
 }
 \value{
 The function returns an \code{\link{KSomics}} object.
