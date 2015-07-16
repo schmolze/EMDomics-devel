@@ -1,10 +1,26 @@
+#' Earth Mover's Distance algorithm for differential analysis of genomics data.
+#'
+#' \code{\link{calculate_cvm}}, \code{\link{calculate_cvm}}, or \code{\link{calculate_ks}} 
+#' will usually be the only function needed, depending on the type of distribution comparison
+#' test that is requested.
+#'
+#'
+#' @import CDFt
+#' @import BiocParallel
+#' @import matrixStats
+#' @import ggplot2
+#' @import CDFt
+#' @name cvmomics-package
+#' @docType package
+NULL
+
+
 #' @export
 #' @title Earth Mover's Distance for differential analysis of genomics data
 #' @description This is the main user interface to the \pkg{EMDomics} package, and
-#' will usually the only function needed when conducting an analysis using the Cramer von Mises
+#' will usually the only function needed when conducting an analysis using the CVM
 #' algorithm. Analyses can also be conducted with the Komolgorov-Smirnov Test using
-#' \code{calculate_ks} or with the Earth Mover's Distance (EMD) algorithm using 
-#' \code{calculate_emd}.
+#' \code{calculate_ks} or the Cramer Von Mises algorithm using \code{calculate_cvm}.
 #'
 #' The algorithm is used to compare genomics data between any number of groups. 
 #' Usually the data will be gene expression
@@ -22,7 +38,7 @@
 #' the squared values of the differences between two cumulative distribution functions (CDFs). 
 #' As a result, the test statistic tends to overestimate the similarity between two distributions and
 #' cannot effectively handle partial matching like EMD does.
-#'
+#' 
 #' The CVM-based algorithm implemented in \pkg{EMDomics} has two main steps.
 #' First, a matrix (e.g. of expression data) is divided into data for each of the groups.
 #' Every possible pairwise CVM score is then computed and stored in a table. The CVM score
@@ -34,7 +50,7 @@
 #' a range of permissive to restrictive significance thresholds. The threshold
 #' that minimizes the FDR is defined as the q-value, and is used to interpret
 #' the significance of the CVM score analogously to a p-value (e.g. q-value
-#' < 0.05 = significant.)
+#' < 0.05 is significant.)
 #'
 #' @param data A matrix containing genomics data (e.g. gene expression levels).
 #' The rownames should contain gene identifiers, while the column names should
@@ -43,11 +59,13 @@
 #' in the \code{data} matrix. The names should be the sample identifiers provided in \code{data}.
 #' @param nperm An integer specifying the number of randomly permuted CVM
 #' scores to be computed. Defaults to 100.
+#' @param pairwise.p Boolean specifying whether the permutation-based q-values should
+#' be computed for each pairwise comparison. Defaults to \code{FALSE}.
 #' @param verbose Boolean specifying whether to display progress messages.
 #' @param parallel Boolean specifying whether to use parallel processing via
 #' the \pkg{BiocParallel} package. Defaults to \code{TRUE}.
 #' @return The function returns an \code{\link{CVMomics}} object.
-#' examples
+#' @examples
 #' # 100 genes, 100 samples
 #' dat <- matrix(rnorm(10000), nrow=100, ncol=100)
 #' rownames(dat) <- paste("gene", 1:100, sep="")
@@ -60,9 +78,10 @@
 #' results <- calculate_cvm(dat, outcomes, nperm=10, parallel=FALSE)
 #' head(results$cvm)
 #' 
-#' @seealso \code{\link{EMDomics}} \code{\link[CDFt]{CramerVonMisesTwoSamples}}
+#' @seealso \code{\link{CVMomics}} \code{\link[CDFt]{CramerVonMisesTwoSamples}}
 calculate_cvm <- function(data, outcomes,
-                          nperm=100, verbose=TRUE, parallel=TRUE) {
+                          nperm=100, pairwise.p=FALSE, verbose=TRUE, 
+                          parallel=TRUE) {
   
   bpparam <- BiocParallel::bpparam()
   
@@ -109,7 +128,15 @@ calculate_cvm <- function(data, outcomes,
   if (verbose)
     message("done.")
   
+  # pairwise q-value computation if specified
+  if (pairwise.p) {
+    cvm.pairwise.q <- .cvm_pairwise_q(data.df, cvm, outcomes, nperm, verbose, bpparam)
+  } else {
+    cvm.pairwise.q <- NULL
+  }
+  
   # --------------- permuted cvm scores ----------------
+  message("Calculating for overall q-values...")
   
   sample_count <- length(outcomes)
   
@@ -192,7 +219,7 @@ calculate_cvm <- function(data, outcomes,
   
   cvm <- cbind(cvm, cvm.qval)
   
-  CVMomics(data, outcomes, cvm, cvm.perm, cvm.tab)
+  CVMomics(data, outcomes, cvm, cvm.perm, cvm.tab, cvm.pairwise.q)
   
 }
 
@@ -211,7 +238,7 @@ calculate_cvm <- function(data, outcomes,
 #' @param outcomes A vector of group labels for the samples. The names must correspond
 #' to the names of \code{vec}.
 #' @param sample_names A character vector with the names of the samples in \code{vec}.
-#' @return The CVM score is returned.
+#' @return The cvm score is returned.
 #' 
 #' @examples
 #' # 100 genes, 100 samples
@@ -268,12 +295,12 @@ calculate_cvm_gene <- function(vec, outcomes, sample_names) {
 #' @param cvm A matrix containing a row for each gene in \code{data}, and with
 #' the following columns:
 #' \itemize{
-#' \item \code{cvm} The calculated CVM score.
+#' \item \code{cvm} The calculated cvm score.
 #' \item \code{q-value} The calculated q-value.
 #' }
 #' The row names should specify the gene identifiers for each row.
 #' @param cvm.perm A matrix containing a row for each gene in \code{data}, and
-#' with a column containing CVM scores for each random permutation calculated
+#' with a column containing cvm scores for each random permutation calculated
 #' via \code{\link{calculate_cvm}}.
 #' @param pairwise.cvm.table A table containing the CVM scores for each pairwise
 #' comparison for each gene. For a two-class problem, there should be only one column
@@ -284,12 +311,110 @@ calculate_cvm_gene <- function(vec, outcomes, sample_names) {
 #' 'CVMomics'. The resulting object is returned.
 #' 
 #' @seealso \code{\link{calculate_cvm}}
-CVMomics <- function(data, outcomes, cvm, cvm.perm, pairwise.cvm.table) {
+CVMomics <- function(data, outcomes, cvm, cvm.perm, pairwise.cvm.table, pairwise.q.table) {
   
   structure(list("data"=data, "outcomes"=outcomes,
-                 "cvm"=cvm, "cvm.perm"=cvm.perm, "pairwise.cvm.table"=pairwise.cvm.table),
+                 "cvm"=cvm, "cvm.perm"=cvm.perm, "pairwise.cvm.table"=pairwise.cvm.table,
+                 "pairwise.q.table"=pairwise.q.table),
             class = "CVMomics")
   
+}
+
+# Creates a table of all the pairwise q-values for all genes
+.cvm_pairwise_q <- function(data.df, cvm, outcomes, nperm, verbose, bpparam) {
+  
+  classes <- unique(outcomes)
+  pairs <- combn(classes,2)
+  names <- apply(pairs,2,function(x){paste(x[1],'vs',x[2])})
+  
+  q.tab <- matrix(NA, nrow=ncol(data.df), ncol=ncol(pairs))
+  colnames(q.tab) <- names
+  rownames(q.tab) <- colnames(data.df)
+  
+  for (p in 1:ncol(pairs)) {
+    
+    # ------------------ calculate permuted cvm scores ---------------------
+    sample_count <- length(outcomes)
+    
+    # matrix to hold permuted cvm values
+    cvm.perm <- matrix(nrow=ncol(data.df), ncol=nperm)
+    rownames(cvm.perm) <- colnames(data.df)
+    colnames(cvm.perm) <- as.character(1:nperm)
+    
+    msg <- paste("Beginning pairwise q-value computation for",names[p])
+    if (verbose)
+      message(msg)
+    
+    for (i in 1:nperm) {
+      
+      msg <- paste("Calculating permuted cvm #", i, " of ",
+                   nperm, "...", sep="")
+      
+      if (verbose)
+        message(msg, appendLF=FALSE)
+      
+      # permute samples
+      idx.perm <- sample(1:sample_count, replace=FALSE)
+      sample.id <- names(outcomes)
+      outcomes.perm <- outcomes[idx.perm]
+      names(outcomes.perm) <- sample.id
+      
+      # calculate cvm for permuted samples
+      perm.val <- BiocParallel::bplapply(data.df, calculate_cvm_gene,
+                                         outcomes.perm, rownames(data.df),
+                                         BPPARAM = bpparam)
+      
+      cvm.perm[,i] <- unlist(sapply(perm.val,"[",1))
+      
+      if (verbose)
+        message("done.")
+    }
+    
+    # ------------------ q-values --------------------
+    
+    if (verbose)
+      message("Calculating pairwise q-values...", appendLF=FALSE)
+    
+    perm.medians <- apply(cvm.perm,1,function(x){median(x)})
+    
+    # generate thresholds and qval matrix
+    thr_upper <- ceiling(max(cvm))
+    thr <- seq(thr_upper, 0, by = -0.001)
+    qvals <- matrix(1, nrow=nrow(cvm), ncol=length(thr))
+    
+    colnames(qvals) <- thr
+    rownames(qvals) <- rownames(cvm)
+    
+    # calculate fdr at each threshold
+    j <- 0
+    for (d in thr) {
+      
+      j <- j+1
+      
+      # calculate true discoveries at this threshold
+      idx <- which(cvm > d)
+      n.signif <- length(idx)
+      genes.signif <- rownames(cvm)[idx]
+      
+      # calculate false discoveries at this threshold
+      idx <- which(perm.medians > d)
+      n.fd <- length(idx)
+      
+      fdr <- n.fd/n.signif
+      qvals[genes.signif, j] <- fdr
+      
+    }
+    
+    # final q-value = smallest fdr
+    cvm.qval <- apply(qvals, 1, min)
+    
+    q.tab[,p] <- cvm.qval
+    
+    if (verbose)
+      message("done.")
+  }
+  
+  q.tab
 }
 
 # Creates a table of all the pairwise CVM scores for one gene
