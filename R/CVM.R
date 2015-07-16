@@ -44,6 +44,15 @@
 #' scores to be computed. Defaults to 100.
 #' @param pairwise.p Boolean specifying whether the permutation-based q-values should
 #' be computed for each pairwise comparison. Defaults to \code{FALSE}.
+#' @param seq Boolean specifying if the given data is RNA Sequencing data and ought to be
+#' normalized. Set to \code{TRUE}, if passing transcripts per million (TPM) data or raw
+#' data that is not scaled. If \code{TRUE}, data will be normalized by first multiplying by 1E6, then adding
+#' 1, then taking the log base 2. If \code{FALSE}, the data will be handled as is (unless 
+#' \code{quantile.norm} is \code{TRUE}). Note that as a distribution comparison function, K-S will
+#' compute faster with scaled data. Defaults to \code{FALSE}.
+#' @param quantile.norm Boolean specifying is data should be normalized by quantiles. If
+#' \code{TRUE}, then the \code{\link[preprocessCore]{normalize.quantiles}} function is used.
+#' Defaults to \code{FALSE}.
 #' @param verbose Boolean specifying whether to display progress messages.
 #' @param parallel Boolean specifying whether to use parallel processing via
 #' the \pkg{BiocParallel} package. Defaults to \code{TRUE}.
@@ -63,8 +72,9 @@
 #' 
 #' @seealso \code{\link{CVMomics}} \code{\link[CDFt]{CramerVonMisesTwoSamples}}
 calculate_cvm <- function(data, outcomes,
-                          nperm=100, pairwise.p=FALSE, verbose=TRUE, 
-                          parallel=TRUE) {
+                          nperm=100, pairwise.p=FALSE, seq=FALSE, 
+                          quantile.norm=FALSE,
+                          verbose=TRUE, parallel=TRUE) {
   
   bpparam <- BiocParallel::bpparam()
   
