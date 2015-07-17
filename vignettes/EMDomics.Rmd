@@ -147,7 +147,7 @@ Note that the EMD score is the average of the each of the pairwise EMD scores. T
 
 In a two-class analysis, the smallest score represents the gene that demonstrates the most similar behavior in both classes, and the largest score represents the gene that demonstrates the most different behavior in both classes.
 
-We can plot a histogram of all the calculated EMD scores with the function `plot_perms`:
+We can plot a histogram of all the calculated EMD scores with the function `plot_emdperms`:
 
 ```{r, message=FALSE}
 plot_emdperms(results)
