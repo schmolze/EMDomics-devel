@@ -3,7 +3,7 @@
 #' @description This is the main user interface to the \pkg{EMDomics} package, and
 #' will usually the only function needed when conducting an analysis using the CVM
 #' algorithm. Analyses can also be conducted with the Komolgorov-Smirnov Test using
-#' \code{calculate_ks} or the Cramer Von Mises algorithm using \code{calculate_cvm}.
+#' \code{calculate_ks} or the Earth Mover's Distance algorithm using \code{calculate_emd}.
 #'
 #' The algorithm is used to compare genomics data between any number of groups. 
 #' Usually the data will be gene expression
