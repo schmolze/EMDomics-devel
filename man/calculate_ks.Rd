@@ -2,7 +2,8 @@
 % Please edit documentation in R/KS.R
 \name{calculate_ks}
 \alias{calculate_ks}
-\title{Calculate the Komolgorov-Smirnov test statistic and q-values.}
+\title{Calculate the Komolgorov-Smirnov test statistic and q-values for differential gene expression
+analysis.}
 \usage{
 calculate_ks(data, outcomes, nperm = 100, pairwise.p = FALSE, seq = FALSE,
   quantile.norm = FALSE, verbose = TRUE, parallel = TRUE)

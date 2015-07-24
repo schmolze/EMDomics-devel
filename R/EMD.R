@@ -1,8 +1,8 @@
 #' Earth Mover's Distance algorithm for differential analysis of genomics data.
 #'
 #' \code{\link{calculate_emd}}, \code{\link{calculate_cvm}}, or \code{\link{calculate_ks}} 
-#' will usually be the only function needed, depending on the type of distribution comparison
-#' test that is requested.
+#' will usually be the only functions needed, depending on the type of distribution comparison
+#' test that is desired.
 #'
 #'
 #' @import emdist
@@ -271,7 +271,7 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
 #' total EMD score for the given data is the average of the pairwise EMD scores.
 #' 
 #' @param vec A named vector containing data (e.g. expression data) for a single
-#' gene.
+#' gene. Names ought to correspond to samples.
 #' @param outcomes A vector of group labels for the samples. The names must correspond
 #' to the names of \code{vec}.
 #' @param sample_names A character vector with the names of the samples in \code{vec}.

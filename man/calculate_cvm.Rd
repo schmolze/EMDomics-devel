@@ -2,7 +2,7 @@
 % Please edit documentation in R/CVM.R
 \name{calculate_cvm}
 \alias{calculate_cvm}
-\title{Earth Mover's Distance for differential analysis of genomics data}
+\title{Cramer von Mises for differential analysis of genomics data}
 \usage{
 calculate_cvm(data, outcomes, nperm = 100, pairwise.p = FALSE,
   seq = FALSE, quantile.norm = FALSE, verbose = TRUE, parallel = TRUE)
@@ -44,7 +44,7 @@ The function returns an \code{\link{CVMomics}} object.
 This is the main user interface to the \pkg{EMDomics} package, and
 will usually the only function needed when conducting an analysis using the CVM
 algorithm. Analyses can also be conducted with the Komolgorov-Smirnov Test using
-\code{calculate_ks} or the Cramer Von Mises algorithm using \code{calculate_cvm}.
+\code{calculate_ks} or the Earth Mover's Distance algorithm using \code{calculate_emd}.
 
 The algorithm is used to compare genomics data between any number of groups.
 Usually the data will be gene expression
@@ -61,7 +61,9 @@ highly heterogeneous, which can be the case in many biological circumstances
 The Cramer von Mises (CVM) algorithm generates a test statistic that is the sum of
 the squared values of the differences between two cumulative distribution functions (CDFs).
 As a result, the test statistic tends to overestimate the similarity between two distributions and
-cannot effectively handle partial matching like EMD does.
+cannot effectively handle partial matching like EMD does. However, it is one of the most
+commonly referenced nonparametric two-class distribution comparison tests in non-genomic
+contexts.
 
 The CVM-based algorithm implemented in \pkg{EMDomics} has two main steps.
 First, a matrix (e.g. of expression data) is divided into data for each of the groups.

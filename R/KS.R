@@ -1,5 +1,6 @@
 #' @export
-#' @title Calculate the Komolgorov-Smirnov test statistic and q-values.
+#' @title Calculate the Komolgorov-Smirnov test statistic and q-values for differential gene expression
+#' analysis.
 #' 
 #' @description This is only function needed when conducting an analysis using the Komolgorov-Smirnov
 #' algorithm. Analyses can also be conducted with the EMD algorithm using
