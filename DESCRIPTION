@@ -17,8 +17,15 @@ Description: The EMDomics algorithm is used to perform a supervised
         needed to transform one distribution into another, thus
         providing a metric of the overall difference in shape between
         two distributions. Permutation of sample labels is used to
+<<<<<<< HEAD
         generate q-values for the observed EMD scores.
 Version: 1.1.1
+=======
+        generate q-values for the observed EMD scores. This package also
+        incorporates the Komolgorov-Smirnov (K-S) test and generates q-values
+        using the same permutation technique.
+Version: 1.1.2
+>>>>>>> SMalladi
 biocViews: Software, DifferentialExpression, GeneExpression, Microarray
 Authors@R: c( person("Sadhika", "Malladi", email="emd.malladi@schmolze.com", role=c("aut","cre")),
         person("Daniel", "Schmolze", email="emd@schmolze.com",
@@ -27,7 +34,11 @@ Authors@R: c( person("Sadhika", "Malladi", email="emd.malladi@schmolze.com", rol
         "Nabavi", email="sheida_nabavi@hms.harvard.edu", role="aut"))
 Maintainer: Sadhika Malladi <emd.malladi@schmolze.com> and Daniel Schmolze <emd@schmolze.com>
 Depends: R (>= 3.2.1)
+<<<<<<< HEAD
 Imports: emdist, BiocParallel, matrixStats, ggplot2
+=======
+Imports: emdist, BiocParallel, matrixStats, ggplot2, CDFt, preprocessCore
+>>>>>>> SMalladi
 Suggests: knitr
 License: MIT + file LICENSE
 LazyData: true
