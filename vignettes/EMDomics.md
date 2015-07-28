@@ -18,7 +18,9 @@ Welcome to the **EMDomics** package! This vignette will explain the functionalit
 
 # Earth Mover's Distance
 
-**EMDomics** analyzes differences in genomics data between groups of samples. Typically the data will be gene expression levels from array- or sequence-based experiments, but other scenarios are possible. In a real two-class experiment, the groups might be test vs. control, sensitive vs. resistant, etc. In a multi-class experiment (i.e., more than two groups of patients), groups may be associated with patients (in the case of single cell measurements) or disease subtypes. Typically you'll be analyzing differences across multiple genes, but we'll start with a single gene to get a feel for how the Earth Mover's Distance (EMD) algorithm works.
+**EMDomics** analyzes differences in genomics data between groups of samples. Typically the data will be gene expression levels from array- or sequence-based experiments, but other scenarios are possible. In a real two-class experiment, the groups might be test vs. control, sensitive vs. resistant, etc. In a multi-class experiment (i.e., more than two groups of patients), groups may be associated with patients (in the case of single cell measurements) or disease subtypes. Typically you'll be analyzing differences across multiple genes, but we'll start with a single gene to get a feel for how the Earth Mover's Distance (EMD) algorithm works. Note also that this package includes functionality for Komolgorov-Smirnov (K-S) and Cramer von Mises (CVM) distribution comparison tests. To access these tests, use `calculate_ks` or `calculate_cvm`. The input and output syntax is the same as `calculate_emd`, with "emd" being replaced with "ks" or "cvm" when accessing output values.
+
+Because this package is **EMDomics** we will go through functionality with calculations for EMD, but K-S and CVM can be accessed with ease by replacing the function name.
 
 We'll create a vector of expression data for 100 samples. We'll assign the first 50 to group "A," the next 20 to group "B," and the final 30 to group "C." We will create a vector of group labels that describes which group each of the samples is a part of. Note that the vector of labels must have names corresponding to the sample identifiers in the data:
 
@@ -190,13 +192,13 @@ emd3 <- emd[(order(emd[,"emd"])),]
 smallest_gene <- rownames(emd3)[1]
 biggest_gene <- rownames(emd3)[nrow(emd3)]
 
-plot_density(results, smallest_gene)
+plot_emd_density(results, smallest_gene)
 ```
 
 ![plot of chunk unnamed-chunk-11](figure/unnamed-chunk-11-1.png) 
 
 ```r
-plot_density(results, biggest_gene)
+plot_emd_density(results, biggest_gene)
 ```
 
 ![plot of chunk unnamed-chunk-11](figure/unnamed-chunk-11-2.png) 
@@ -209,7 +211,7 @@ We can plot a histogram of all the calculated EMD scores with the function `plot
 
 
 ```r
-plot_perms(results)
+plot_emdperms(results)
 ```
 
 ![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12-1.png) 
