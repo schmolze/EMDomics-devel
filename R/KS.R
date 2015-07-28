@@ -262,18 +262,18 @@ calculate_ks <- function(data, outcomes, nperm=100,
 #' 
 #' @examples
 #' # 100 genes, 100 samples
-#' dat <- matrix(rnorm(10000), nrow=100, ncol=100)
+#' dat <- matrix(rnorm(100000), nrow=100, ncol=1000)
 #' rownames(dat) <- paste("gene", 1:100, sep="")
-#' colnames(dat) <- paste("sample", 1:100, sep="")
+#' colnames(dat) <- paste("sample", 1:1000, sep="")
 #'
-#' # "A": first 50 samples; "B": next 30 samples; "C": final 20 samples
-#' outcomes <- c(rep("A",50), rep("B",30), rep("C",20))
+#' # assign outcomes
+#' outcomes <- c(rep(1,500), rep(2,300), rep(3,200))
 #' names(outcomes) <- colnames(dat)
 #'
 #' calculate_ks_gene(dat[1,], outcomes, colnames(dat))
 #' 
 #' @seealso \code{\link{ks.test}}
-calculate_ks_gene <- function(geneData, sample_names, outcomes) {
+calculate_ks_gene <- function(geneData, outcomes, sample_names) {
   
   names(geneData) <- sample_names
   

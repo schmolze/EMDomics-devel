@@ -4,13 +4,13 @@
 \alias{calculate_ks_gene}
 \title{Calculate KS score for a single gene}
 \usage{
-calculate_ks_gene(geneData, sample_names, outcomes)
+calculate_ks_gene(geneData, outcomes, sample_names)
 }
 \arguments{
-\item{sample_names}{A character vector with the names of the samples in \code{vec}.}
-
 \item{outcomes}{A vector of group labels for the samples. The names must correspond
 to the names of \code{vec}.}
+
+\item{sample_names}{A character vector with the names of the samples in \code{vec}.}
 
 \item{vec}{A named vector containing data (e.g. expression data) for a single
 gene.}
@@ -30,12 +30,12 @@ total KS score for the given data is the average of the pairwise KS scores.
 }
 \examples{
 # 100 genes, 100 samples
-dat <- matrix(rnorm(10000), nrow=100, ncol=100)
+dat <- matrix(rnorm(100000), nrow=100, ncol=1000)
 rownames(dat) <- paste("gene", 1:100, sep="")
-colnames(dat) <- paste("sample", 1:100, sep="")
+colnames(dat) <- paste("sample", 1:1000, sep="")
 
-# "A": first 50 samples; "B": next 30 samples; "C": final 20 samples
-outcomes <- c(rep("A",50), rep("B",30), rep("C",20))
+# assign outcomes
+outcomes <- c(rep(1,500), rep(2,300), rep(3,200))
 names(outcomes) <- colnames(dat)
 
 calculate_ks_gene(dat[1,], outcomes, colnames(dat))
