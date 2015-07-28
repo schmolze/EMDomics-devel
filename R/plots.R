@@ -149,7 +149,7 @@ plot_cvmnull <- function(cvmobj) {
 #' names(outcomes) <- colnames(dat)
 #' 
 #' results <- calculate_emd(dat, outcomes, nperm=10, parallel=FALSE)
-#' plot_perms(results)
+#' plot_emdperms(results)
 #' @seealso \code{\link{calculate_emd}} \code{\link[ggplot2]{ggplot}}
 plot_emdperms <- function(emdobj) {
 
@@ -189,7 +189,7 @@ plot_emdperms <- function(emdobj) {
 #' names(outcomes) <- colnames(dat)
 #' 
 #' results <- calculate_ks(dat, outcomes, nperm=10, parallel=FALSE)
-#' plot_perms(results)
+#' plot_ksperms(results)
 #' @seealso \code{\link{calculate_ks}} \code{\link[ggplot2]{ggplot}}
 plot_ksperms <- function(ksobj) {
   
@@ -229,7 +229,7 @@ plot_ksperms <- function(ksobj) {
 #' names(outcomes) <- colnames(dat)
 #' 
 #' results <- calculate_cvm(dat, outcomes, nperm=10, parallel=FALSE)
-#' plot_perms(results)
+#' plot_cvmperms(results)
 #' @seealso \code{\link{calculate_cvm}} \code{\link[ggplot2]{ggplot}}
 plot_cvmperms <- function(cvmobj) {
   
@@ -275,7 +275,7 @@ plot_cvmperms <- function(cvmobj) {
 #' names(outcomes) <- colnames(dat)
 #' 
 #' results <- calculate_emd(dat, outcomes, nperm=10, parallel=FALSE)
-#' plot_density(results, "gene5")
+#' plot_emd_density(results, "gene5")
 #' 
 #' @seealso \code{\link{calculate_emd}} \code{\link[ggplot2]{ggplot}}
 plot_emd_density <- function(emdobj, gene_name) {
@@ -329,7 +329,7 @@ plot_emd_density <- function(emdobj, gene_name) {
 #' names(outcomes) <- colnames(dat)
 #' 
 #' results <- calculate_ks(dat, outcomes, nperm=10, parallel=FALSE)
-#' plot_density(results, "gene5")
+#' plot_ks_density(results, "gene5")
 #' 
 #' @seealso \code{\link{calculate_ks}} \code{\link[ggplot2]{ggplot}}
 plot_ks_density <- function(ksobj, gene_name) {
@@ -383,7 +383,7 @@ plot_ks_density <- function(ksobj, gene_name) {
 #' names(outcomes) <- colnames(dat)
 #' 
 #' results <- calculate_cvm(dat, outcomes, nperm=10, parallel=FALSE)
-#' plot_density(results, "gene5")
+#' plot_cvm_density(results, "gene5")
 #' 
 #' @seealso \code{\link{calculate_cvm}} \code{\link[ggplot2]{ggplot}}
 plot_cvm_density <- function(cvmobj, gene_name) {

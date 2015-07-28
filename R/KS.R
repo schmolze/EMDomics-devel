@@ -58,9 +58,6 @@
 #' @param quantile.norm Boolean specifying is data should be normalized by quantiles. If
 #' \code{TRUE}, then the \code{\link[preprocessCore]{normalize.quantiles}} function is used.
 #' Defaults to \code{FALSE}.
-#' @param quantile.norm Boolean specifying is data should be normalized by quantiles. If
-#' \code{TRUE}, then the \code{\link[preprocessCore]{normalize.quantiles}} function is used.
-#' Defaults to \code{FALSE}.
 #' @param verbose Boolean specifying whether to display progress messages.
 #' @param parallel Boolean specifying whether to use parallel processing via
 #' the \pkg{BiocParallel} package. Defaults to \code{TRUE}.
@@ -273,9 +270,9 @@ calculate_ks <- function(data, outcomes, nperm=100,
 #' calculate_ks_gene(dat[1,], outcomes, colnames(dat))
 #' 
 #' @seealso \code{\link{ks.test}}
-calculate_ks_gene <- function(geneData, outcomes, sample_names) {
+calculate_ks_gene <- function(vec, outcomes, sample_names) {
   
-  names(geneData) <- sample_names
+  names(vec) <- sample_names
   
   classes <- unique(outcomes)
   pairs <- combn(classes,2)
@@ -291,7 +288,7 @@ calculate_ks_gene <- function(geneData, outcomes, sample_names) {
     src.lab <- names(outcomes[outcomes==src])
     sink.lab <- names(outcomes[outcomes==sink])
     
-    KS <- ks.test(geneData[src.lab],geneData[sink.lab])
+    KS <- ks.test(vec[src.lab],vec[sink.lab])
     KS.tab[1,p] <- unname(KS$statistic)
   }
   

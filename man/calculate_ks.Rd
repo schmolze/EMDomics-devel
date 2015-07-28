@@ -38,10 +38,6 @@ Defaults to \code{FALSE}.}
 
 \item{parallel}{Boolean specifying whether to use parallel processing via
 the \pkg{BiocParallel} package. Defaults to \code{TRUE}.}
-
-\item{quantile.norm}{Boolean specifying is data should be normalized by quantiles. If
-\code{TRUE}, then the \code{\link[preprocessCore]{normalize.quantiles}} function is used.
-Defaults to \code{FALSE}.}
 }
 \value{
 The function returns an \code{\link{KSomics}} object.

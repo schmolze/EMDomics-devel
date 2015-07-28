@@ -29,7 +29,7 @@ outcomes <- c(rep("A",50), rep("B",30), rep("C",20))
 names(outcomes) <- colnames(dat)
 
 results <- calculate_emd(dat, outcomes, nperm=10, parallel=FALSE)
-plot_perms(results)
+plot_emdperms(results)
 }
 \seealso{
 \code{\link{calculate_emd}} \code{\link[ggplot2]{ggplot}}

@@ -4,16 +4,16 @@
 \alias{calculate_ks_gene}
 \title{Calculate KS score for a single gene}
 \usage{
-calculate_ks_gene(geneData, outcomes, sample_names)
+calculate_ks_gene(vec, outcomes, sample_names)
 }
 \arguments{
+\item{vec}{A named vector containing data (e.g. expression data) for a single
+gene.}
+
 \item{outcomes}{A vector of group labels for the samples. The names must correspond
 to the names of \code{vec}.}
 
 \item{sample_names}{A character vector with the names of the samples in \code{vec}.}
-
-\item{vec}{A named vector containing data (e.g. expression data) for a single
-gene.}
 }
 \value{
 The KS score is returned.

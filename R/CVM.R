@@ -312,6 +312,8 @@ calculate_cvm_gene <- function(vec, outcomes, sample_names) {
 #' comparison for each gene. For a two-class problem, there should be only one column
 #' comparing class 1 and class 2. The row names should be gene identifiers. The column
 #' names should be in the format "<class 1> vs <class 2>" (e.g. "1 vs 2" or "A vs B").
+#' @param pairwise.q.table A table containing the permutation-based q-values for each
+#' pairwise comparison for each gene. May be \code{NULL} if \code{pairwise.p=F}.
 #' 
 #' @return The function combines its arguments in a list, which is assigned class
 #' 'CVMomics'. The resulting object is returned.

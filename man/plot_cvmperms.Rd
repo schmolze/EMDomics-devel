@@ -29,7 +29,7 @@ outcomes <- c(rep("A",50), rep("B",30), rep("C",20))
 names(outcomes) <- colnames(dat)
 
 results <- calculate_cvm(dat, outcomes, nperm=10, parallel=FALSE)
-plot_perms(results)
+plot_cvmperms(results)
 }
 \seealso{
 \code{\link{calculate_cvm}} \code{\link[ggplot2]{ggplot}}
