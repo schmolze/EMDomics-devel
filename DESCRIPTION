@@ -22,12 +22,12 @@ Description: The EMDomics algorithm is used to perform a supervised
         using the same permutation technique.
 Version: 1.1.2
 biocViews: Software, DifferentialExpression, GeneExpression, Microarray
-Authors@R: c( person("Sadhika", "Malladi", email="emd.malladi@schmolze.com", role=c("aut","cre")),
+Authors@R: c( person("Sadhika", "Malladi", email="contact@sadhikamalladi.com", role=c("aut","cre")),
         person("Daniel", "Schmolze", email="emd@schmolze.com",
         role=c("aut","cre")), person("Andrew", "Beck",
         email="abeck2@bidmc.harvard.edu", role="aut"), person("Sheida",
         "Nabavi", email="sheida_nabavi@hms.harvard.edu", role="aut"))
-Maintainer: Sadhika Malladi <emd.malladi@schmolze.com> and Daniel Schmolze <emd@schmolze.com>
+Maintainer: Sadhika Malladi <contact@sadhikamalladi.com> and Daniel Schmolze <emd@schmolze.com>
 Depends: R (>= 3.2.1)
 Imports: emdist, BiocParallel, matrixStats, ggplot2, CDFt, preprocessCore
 Suggests: knitr
