@@ -150,7 +150,7 @@ calculate_ks <- function(data, outcomes, nperm=100,
   if (verbose)
     message("Calculating KS...", appendLF=FALSE)
   
-  ks <- apply(ks.stat, 1, function(x){mean(as.numeric(x))})
+  ks <- apply(ks.stat, 1, function(x){mean(x)})
   
   ks <- as.matrix(ks)
   rownames(ks) <- colnames(data.df)
@@ -183,7 +183,7 @@ calculate_ks <- function(data, outcomes, nperm=100,
     
     # calculate ks for permuted samples
     perm.val <- BiocParallel::bplapply(data.df, calculate_ks_gene,
-                                       rownames(data.df), outcomes.perm,
+                                       outcomes.perm, rownames(data.df),
                                        BPPARAM = bpparam)
     
     ks.perm[,i] <- as.numeric(unlist(sapply(perm.val,"[",1)))
