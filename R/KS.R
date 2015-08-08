@@ -186,7 +186,7 @@ calculate_ks <- function(data, outcomes, nperm=100,
                                        rownames(data.df), outcomes.perm,
                                        BPPARAM = bpparam)
     
-    ks.perm[,i] <- unlist(sapply(perm.val,"[",1))
+    ks.perm[,i] <- as.numeric(unlist(sapply(perm.val,"[",1)))
     
     if (verbose)
       message("done.")
@@ -294,7 +294,7 @@ calculate_ks_gene <- function(vec, outcomes, sample_names) {
   
   KS.tab <- as.numeric(KS.tab)
   
-  mean(KS.tab)
+  mean(KS.tab,na.rm=T)
 }
 
 #' @export
@@ -353,8 +353,6 @@ KSomics <- function(data, outcomes, ks, ks.perm,
     inds <- pairs[,p]
     src <- inds[1]
     sink <- inds[2]
-    cat(src)
-    cat(sink)
     src.lab <- names(outcomes[outcomes==src])
     sink.lab <- names(outcomes[outcomes==sink])
     

@@ -52,6 +52,10 @@ NULL
 #' that minimizes the FDR is defined as the q-value, and is used to interpret
 #' the significance of the EMD score analogously to a p-value (e.g. q-value
 #' < 0.05 is significant.)
+#' 
+#' Because EMD is based on a histogram binning of the expression levels, data that
+#' cannot be binned will be discarded, and a message for that gene will be printed.
+#' The most likely reason for histogram binning failing is due to uniform values (e.g. all 0s).
 #'
 #' @param data A matrix containing genomics data (e.g. gene expression levels).
 #' The rownames should contain gene identifiers, while the column names should
@@ -201,7 +205,7 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
                                                    binSize,
                                                    BPPARAM = bpparam)
   
-    emd.perm[,i] <- unlist(sapply(perm.val,"[",1))
+    emd.perm[,i] <- as.numeric(unlist(sapply(perm.val,"[",1)))
     
     if (verbose)
       message("done.")
@@ -226,9 +230,9 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
   # calculate fdr at each threshold
   j <- 0
   for (d in thr) {
-
+    
     j <- j+1
-
+    
     # calculate true discoveries at this threshold
     idx <- which(emd > d)
     n.signif <- length(idx)

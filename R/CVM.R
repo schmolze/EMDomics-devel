@@ -170,7 +170,7 @@ calculate_cvm <- function(data, outcomes,
                                        outcomes.perm, rownames(data.df),
                                        BPPARAM = bpparam)
     
-    cvm.perm[,i] <- unlist(sapply(perm.val,"[",1))
+    cvm.perm[,i] <- as.numeric(unlist(sapply(perm.val,"[",1)))
     
     if (verbose)
       message("done.")
@@ -284,7 +284,7 @@ calculate_cvm_gene <- function(vec, outcomes, sample_names) {
   
   CVM.tab <- as.numeric(CVM.tab)
   
-  mean(CVM.tab)
+  mean(CVM.tab,na.rm=T)
 }
 
 
