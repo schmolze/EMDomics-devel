@@ -19,8 +19,8 @@ Description: The EMDomics algorithm is used to perform a supervised
         two distributions. Permutation of sample labels is used to
         generate q-values for the observed EMD scores. This package also
         incorporates the Komolgorov-Smirnov (K-S) test and the Cramer von Mises
-        test (CVM).
-Version: 1.1.2
+        test (CVM), which are both common distribution comparison tests.
+Version: 1.1.3
 biocViews: Software, DifferentialExpression, GeneExpression, Microarray
 Authors@R: c( person("Sadhika", "Malladi", email="contact@sadhikamalladi.com", role=c("aut","cre")),
         person("Daniel", "Schmolze", email="emd@schmolze.com",
