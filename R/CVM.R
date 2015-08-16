@@ -1,6 +1,6 @@
 #' @export
 #' @title Cramer von Mises for differential analysis of genomics data
-#' @description This is the main user interface to the \pkg{EMDomics} package, and
+#' @description This is a main user interface to the \pkg{EMDomics} package, and
 #' will usually the only function needed when conducting an analysis using the CVM
 #' algorithm. Analyses can also be conducted with the Komolgorov-Smirnov Test using
 #' \code{calculate_ks} or the Earth Mover's Distance algorithm using \code{calculate_emd}.
@@ -126,7 +126,7 @@ calculate_cvm <- function(data, outcomes,
   if (verbose)
     message("Calculating cvm...", appendLF=FALSE)
   
-  cvm <- apply(cvm.tab, 1, function(x){mean(as.numeric(x))})
+  cvm <- apply(cvm.tab, 1, function(x){max(as.numeric(x))})
   
   cvm <- as.matrix(cvm)
   colnames(cvm) <- "cvm"
@@ -284,7 +284,7 @@ calculate_cvm_gene <- function(vec, outcomes, sample_names) {
   
   CVM.tab <- as.numeric(CVM.tab)
   
-  mean(CVM.tab,na.rm=T)
+  max(CVM.tab,na.rm=T)
 }
 
 

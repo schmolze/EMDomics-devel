@@ -150,7 +150,7 @@ calculate_ks <- function(data, outcomes, nperm=100,
   if (verbose)
     message("Calculating KS...", appendLF=FALSE)
   
-  ks <- apply(ks.stat, 1, function(x){mean(x)})
+  ks <- apply(ks.stat, 1, function(x){max(x)})
   
   ks <- as.matrix(ks)
   rownames(ks) <- colnames(data.df)
@@ -294,7 +294,7 @@ calculate_ks_gene <- function(vec, outcomes, sample_names) {
   
   KS.tab <- as.numeric(KS.tab)
   
-  mean(KS.tab,na.rm=T)
+  max(KS.tab,na.rm=T)
 }
 
 #' @export

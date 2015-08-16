@@ -161,7 +161,7 @@ calculate_emd <- function(data, outcomes, binSize=0.2,
   if (verbose)
     message("Calculating emd...", appendLF=FALSE)
   
-  emd <- apply(emd.tab, 1, function(x){mean(as.numeric(x),na.rm=T)})
+  emd <- apply(emd.tab, 1, function(x){max(as.numeric(x),na.rm=T)})
 
   emd <- as.matrix(emd)
   colnames(emd) <- "emd"
@@ -320,7 +320,7 @@ calculate_emd_gene <- function(vec, outcomes, sample_names, binSize=0.2) {
   
   EMD.tab <- as.numeric(EMD.tab)
   
-  mean(EMD.tab,na.rm=T)
+  max(EMD.tab,na.rm=T)
 }
 
 
