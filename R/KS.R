@@ -294,7 +294,7 @@ calculate_ks_gene <- function(vec, outcomes, sample_names) {
   
   KS.tab <- as.numeric(KS.tab)
   
-  max(KS.tab,na.rm=T)
+  max(KS.tab,na.rm=TRUE)
 }
 
 #' @export

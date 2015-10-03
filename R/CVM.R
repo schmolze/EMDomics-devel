@@ -284,7 +284,7 @@ calculate_cvm_gene <- function(vec, outcomes, sample_names) {
   
   CVM.tab <- as.numeric(CVM.tab)
   
-  max(CVM.tab,na.rm=T)
+  max(CVM.tab,na.rm=TRUE)
 }
 
 
