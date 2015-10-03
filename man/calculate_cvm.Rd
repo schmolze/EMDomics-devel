@@ -41,7 +41,7 @@ the \pkg{BiocParallel} package. Defaults to \code{TRUE}.}
 The function returns an \code{\link{CVMomics}} object.
 }
 \description{
-This is the main user interface to the \pkg{EMDomics} package, and
+This is a main user interface to the \pkg{EMDomics} package, and
 will usually the only function needed when conducting an analysis using the CVM
 algorithm. Analyses can also be conducted with the Komolgorov-Smirnov Test using
 \code{calculate_ks} or the Earth Mover's Distance algorithm using \code{calculate_emd}.

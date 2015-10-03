@@ -79,6 +79,10 @@ a range of permissive to restrictive significance thresholds. The threshold
 that minimizes the FDR is defined as the q-value, and is used to interpret
 the significance of the EMD score analogously to a p-value (e.g. q-value
 < 0.05 is significant.)
+
+Because EMD is based on a histogram binning of the expression levels, data that
+cannot be binned will be discarded, and a message for that gene will be printed.
+The most likely reason for histogram binning failing is due to uniform values (e.g. all 0s).
 }
 \examples{
 # 100 genes, 100 samples
